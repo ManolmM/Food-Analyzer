@@ -10,4 +10,9 @@ public class CommandExecutor {
         return new CommandExecutor();
     }
 
+
+    public void takeCommand(Command c) {
+
+    }
+
 }

@@ -29,8 +29,9 @@ public class GetFoodByBarcodeCommand implements Command {
     }
 
     @Override
-    public void executeRequest() throws URISyntaxException {
-        HttpRequest request;
+    public String executeRequest() throws URISyntaxException {
+        throw new UnsupportedOperationException("");
+/*        HttpRequest request;
         HttpClient client = HttpClient.newBuilder().build();
 
         try {
@@ -53,9 +54,10 @@ public class GetFoodByBarcodeCommand implements Command {
             throw new RuntimeException(e);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
-        }
+        }*/
 
         //get-food-by-barcode C:\\Users\\root\\Pictures\\Barcode\\upc-barcode.gif
+
     }
 
     private URI configureUri() throws URISyntaxException {

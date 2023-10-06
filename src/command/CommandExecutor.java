@@ -26,17 +26,19 @@ public class CommandExecutor {
         commands.add(c);
     }
 
-    public void placeCommand() {
+    public String placeCommand() {
         if (commands.isEmpty()) {
-            System.out.println("No command yet taken");
-            return;
+            throw new UnsupportedOperationException("");
+            //System.out.println("No command yet taken");
+            //return;
         }
 
         try {
-            commands.get(commands.size() - 1).executeRequest();
+            return commands.get(commands.size() - 1).executeRequest();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+        throw new UnsupportedOperationException("");
     }
 
 }

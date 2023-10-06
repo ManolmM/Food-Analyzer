@@ -31,7 +31,7 @@ public class FileHandler {
             fileWriter.write(headLine);
             fileWriter.flush();
         } catch (IOException e) {
-            throw new IOException("Unable to open dataset file ");
+            throw new IOException("Unable to open dataset file.");
         }
     }
 
@@ -41,7 +41,7 @@ public class FileHandler {
             fileWrite.newLine();
             fileWrite.flush();
         } catch (IOException e) {
-            throw new IOException("Unable to write new data to dataset file");
+            throw new IOException("Unable to write new data to the dataset file.");
         }
     }
 

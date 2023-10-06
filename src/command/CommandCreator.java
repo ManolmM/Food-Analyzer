@@ -1,10 +1,9 @@
 package command;
 
 import command.type.CommandType;
-import exceptions.EmptyCommandException;
+import exceptions.NoCommandProvidedException;
 import exceptions.MissingCommandArgumentsException;
 import exceptions.UnknownCommandException;
-import network.http.handler.HttpHandler;
 import storage.foods.DataExchanger;
 import storage.foods.FileHandler;
 
@@ -21,11 +20,11 @@ public class CommandCreator {
      *
      * @return List of String representing the command
      **/
-    private static List<String> getCommandArguments(String clientInput) throws EmptyCommandException,
+    private static List<String> getCommandArguments(String clientInput) throws NoCommandProvidedException,
                                                                                UnknownCommandException,
                                                                                MissingCommandArgumentsException {
         if (clientInput == null || clientInput.isEmpty() || clientInput.isBlank()) {
-            throw new EmptyCommandException("No command is provided");
+            throw new NoCommandProvidedException("No command is provided");
         }
 
         String[] splitCommand = clientInput.split(" ");
@@ -57,7 +56,7 @@ public class CommandCreator {
      *
      * @return new Command type
      **/
-    public static Command newCommand(String clientInput) throws EmptyCommandException,
+    public static Command newCommand(String clientInput) throws NoCommandProvidedException,
                                                                 UnknownCommandException,
                                                                 MissingCommandArgumentsException,
                                                                 IOException {

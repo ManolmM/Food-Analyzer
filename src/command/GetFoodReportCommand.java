@@ -26,6 +26,12 @@ public class GetFoodReportCommand implements Command {
     private final String carbohydrates = "Carbohydrate, by difference";
     private final String fiber = "Fiber, total dietary";
     private final int fdcIdIndex = 1;
+
+    private final int energyIndex = 0;
+    private final int proteinIndex = 1;
+    private final int totalLipidsIndex = 2;
+    private final int carbohydratesIndex = 3;
+    private final int fiberIndex = 4;
     private URI uri;
     private List<String> command;
     private DataExchanger exchanger;
@@ -35,12 +41,11 @@ public class GetFoodReportCommand implements Command {
         this.command = commandInput;
     }
     @Override
-    public void executeRequest() throws URISyntaxException, IOException, InterruptedException, MissingExtractedDataException {
+    public String executeRequest() throws URISyntaxException, IOException, InterruptedException, MissingExtractedDataException {
 
         FoodByFdcId extractedFoodFromStorage = exchanger.retrieveData(Integer.parseInt(command.get(fdcIdIndex)));
         if (extractedFoodFromStorage != null) {
-            clientOutput(extractedFoodFromStorage);
-            return;
+            return clientOutput(extractedFoodFromStorage);
         }
 
         HttpRequest request;
@@ -54,7 +59,7 @@ public class GetFoodReportCommand implements Command {
         FoodByFdcId foodInOrderNutrients = getNewFoodByFdcId(extractedFood);
         try {
             exchanger.storeData(foodInOrderNutrients);
-            clientOutput(foodInOrderNutrients);
+            return clientOutput(foodInOrderNutrients);
         } catch (MissingExtractedDataException e) {
             throw e;
         } catch (IOException e) {
@@ -118,15 +123,60 @@ public class GetFoodReportCommand implements Command {
     }
 
 
-    private void clientOutput(FoodByFdcId extractedFood) {
-        System.out.println(extractedFood.description());
-        System.out.println(extractedFood.ingredients());
+    private String clientOutput(FoodByFdcId extractedFood) {
+        StringBuilder result = new StringBuilder();
+        String temp = extractedFood.description();
+        if (temp == null) {
+            result.append("No information\n");
+        } else {
+            result.append(temp).append("\n");
+        }
 
-        System.out.println("Nutrients:");
-        System.out.println("Energy - " + extractedFood.foodNutrients().get(0).amount());
-        System.out.println("Protein - " + extractedFood.foodNutrients().get(1).amount());
-        System.out.println("Total lipid(fat) - " + extractedFood.foodNutrients().get(2).amount());
-        System.out.println("Carbohydrates - " + extractedFood.foodNutrients().get(3).amount());
-        System.out.println("Fiber - " + extractedFood.foodNutrients().get(4).amount());
+        temp = extractedFood.ingredients();
+        if (temp == null) {
+            result.append("No information\n");
+        } else {
+            result.append(temp).append("\n");
+        }
+
+
+        result.append("Nutrients:\n");
+
+        temp = String.valueOf(extractedFood.foodNutrients().get(energyIndex).amount());
+        if (temp == null) {
+            result.append("Energy - No information");
+        } else {
+            result.append("Energy - ").append(extractedFood.foodNutrients().get(energyIndex).amount()).append("\n");
+        }
+
+        temp = String.valueOf(extractedFood.foodNutrients().get(proteinIndex).amount());
+        if (temp == null) {
+            result.append("Protein - No information");
+        } else {
+            result.append("Protein - ").append(extractedFood.foodNutrients().get(proteinIndex).amount()).append("\n");
+        }
+
+        temp = String.valueOf(extractedFood.foodNutrients().get(totalLipidsIndex).amount());
+        if (temp == null) {
+            result.append("Total lipid(fat) - No information");
+        } else {
+            result.append("Total lipid(fat) - ").append(extractedFood.foodNutrients().get(totalLipidsIndex).amount()).append("\n");
+        }
+
+        temp = String.valueOf(extractedFood.foodNutrients().get(carbohydratesIndex).amount());
+        if (temp == null) {
+            result.append("Carbohydrates - No information");
+        } else {
+            result.append("Carbohydrates - ").append(extractedFood.foodNutrients().get(carbohydratesIndex).amount()).append("\n");
+        }
+
+        temp = String.valueOf(extractedFood.foodNutrients().get(fiberIndex).amount());
+        if (temp == null) {
+            result.append("Fiber - No information");
+        } else {
+            result.append("Fiber - ").append(extractedFood.foodNutrients().get(4).amount()).append("\n");
+        }
+
+        return result.toString();
     }
 }

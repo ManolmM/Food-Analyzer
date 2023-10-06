@@ -24,13 +24,14 @@ public class GetFoodCommand implements Command {
         this.command = commandInput;
     }
     @Override
-    public void executeRequest() throws IOException, InterruptedException, URISyntaxException {
+    public String executeRequest() throws IOException, InterruptedException, URISyntaxException {
         HttpRequest request;
         HttpClient client = HttpClient.newBuilder().build();
         Gson gson = new Gson();
 
         int pageNumberRequest = 1;
         Page page;
+        StringBuilder pageList = new StringBuilder();
         do {
             String newPage = modifyUriQueryPageNumber(pageNumberRequest++);
             uri = configureUri(configureQuery(newPage));
@@ -39,12 +40,11 @@ public class GetFoodCommand implements Command {
             String extractedPage = client.send(request, HttpResponse.BodyHandlers.ofString()).body();
             page = gson.fromJson(extractedPage, Page.class);
 
-            for (FoodByName item : page.foods()) {
-                System.out.println(item.fdcId() + " " + item.description() + " " + item.gtinUpc());
-            }
-
+            pageList.append(modifyPageToClient(page));
+            System.out.println(pageList);
         } while (page.totalPages() > page.currentPage());
 
+        return pageList.toString();
     }
 
     private String mergeCommandArguments() {
@@ -86,6 +86,18 @@ public class GetFoodCommand implements Command {
                 .uri(uri)
                 .GET()
                 .build();
+    }
+
+    private String modifyPageToClient(Page page) {
+        StringBuilder output = new StringBuilder();
+
+        for (FoodByName item : page.foods()) {
+            output.append(item.fdcId()).append(" ")
+                    .append(item.description()).append(" ")
+                    .append(item.gtinUpc()).append("\n");
+        }
+
+        return output.toString();
     }
 
 }

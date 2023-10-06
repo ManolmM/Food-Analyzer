@@ -6,5 +6,5 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 public interface Command {
-    void executeRequest() throws IOException, InterruptedException, URISyntaxException, MissingExtractedDataException;
+    public String executeRequest() throws IOException, InterruptedException, URISyntaxException, MissingExtractedDataException;
 }

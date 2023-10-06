@@ -4,8 +4,11 @@ import command.type.CommandType;
 import exceptions.EmptyCommandException;
 import exceptions.MissingCommandArgumentsException;
 import exceptions.UnknownCommandException;
-import network.http.handler.HttpService;
+import network.http.handler.HttpHandler;
+import storage.foods.DataExchanger;
+import storage.foods.FileHandler;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,14 +59,15 @@ public class CommandCreator {
      **/
     public static Command newCommand(String clientInput) throws EmptyCommandException,
                                                                 UnknownCommandException,
-                                                                MissingCommandArgumentsException {
+                                                                MissingCommandArgumentsException,
+                                                                IOException {
 
         List<String> args = getCommandArguments(clientInput);
         CommandType type = getType(args.get(COMMAND_TYPE_INDEX));
         return switch (type) {
-            case GET_FOOD -> new GetFoodCommand(HttpService.newInstance(), args);
-            case GET_FOOD_REPORT -> new GetFoodReportCommand(HttpService.newInstance(), args);
-            default -> new GetFoodByBarcodeCommand(HttpService.newInstance(), args);
+            case GET_FOOD -> new GetFoodCommand(DataExchanger.of(FileHandler.newInstance()), args);
+            case GET_FOOD_REPORT -> new GetFoodReportCommand(DataExchanger.of(FileHandler.newInstance()), args);
+            default -> new GetFoodByBarcodeCommand(DataExchanger.of(FileHandler.newInstance()), args);
         };
     }
 

@@ -1,9 +1,7 @@
 package command;
 
-import network.http.handler.HttpService;
+import network.http.handler.HttpHandler;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -15,7 +13,7 @@ public class CommandExecutor {
         commands = new LinkedList<>();
     }
 
-    public static CommandExecutor of() {
+    public static CommandExecutor newInstance() {
         return new CommandExecutor();
     }
 
@@ -28,7 +26,7 @@ public class CommandExecutor {
         commands.add(c);
     }
 
-    public void placeCommand(HttpService connection) {
+    public void placeCommand() {
         if (commands.isEmpty()) {
             System.out.println("No command yet taken");
             return;

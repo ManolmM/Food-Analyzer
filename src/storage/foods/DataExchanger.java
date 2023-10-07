@@ -5,16 +5,16 @@ import json.extractor.food.fdcid.FoodByFdcId;
 import json.extractor.food.nutrient.FoodNutrients;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class DataExchanger {
 
     private List<FoodByFdcId> storage;
     private FoodFileHandler foodFileHandler;
 
-    private DataExchanger(FoodFileHandler foodFileHandler) {
+    private DataExchanger(FoodFileHandler foodFileHandler) throws IOException {
         this.foodFileHandler = foodFileHandler;
+
         storage = new ArrayList<>();
     }
 
@@ -26,11 +26,17 @@ public class DataExchanger {
             return null;
         }
 
-        List<FoodByFdcId> result = storage.stream()
+/*        List<FoodByFdcId> result = storage.stream()
                 .filter(p -> p.fdcId() == fdcId)
-                .toList();
+                .toList();*/
 
-        return result.get(0);
+        for (FoodByFdcId food : storage) {
+            if (food.fdcId() == fdcId) {
+                return food;
+            }
+        }
+
+        return null;
     }
 
     public void storeData(FoodByFdcId record) throws MissingExtractedDataException, IOException {

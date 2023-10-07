@@ -12,7 +12,7 @@ public class FoodAnalyzerAPI {
     public static void main(String[] args) {
 
 
-        try {
+/*        try {
             Scanner scanner = new Scanner(System.in);
             System.out.print("Enter query: ");
             String command = scanner.nextLine();
@@ -27,7 +27,7 @@ public class FoodAnalyzerAPI {
         } catch (Exception e) {
             System.out.println(e.getMessage());
             System.out.println(e.getStackTrace());
-        }
+        }*/
     }
 //get-food-report 2032440
 //get-food-report 2110388

@@ -56,7 +56,7 @@ public class CommandCreator {
      *
      * @return new Command type
      **/
-    public static Command newCommand(String clientInput) throws NoCommandProvidedException,
+    public static Command newCommand(DataExchanger dataExchanger, String clientInput) throws NoCommandProvidedException,
                                                                 UnknownCommandException,
                                                                 MissingCommandArgumentsException,
                                                                 IOException {
@@ -64,9 +64,9 @@ public class CommandCreator {
         List<String> args = getCommandArguments(clientInput);
         CommandType type = getType(args.get(COMMAND_TYPE_INDEX));
         return switch (type) {
-            case GET_FOOD -> new GetFoodCommand(DataExchanger.of(FoodFileHandler.newInstance()), args);
-            case GET_FOOD_REPORT -> new GetFoodReportCommand(DataExchanger.of(FoodFileHandler.newInstance()), args);
-            default -> new GetFoodByBarcodeCommand(DataExchanger.of(FoodFileHandler.newInstance()), args);
+            case GET_FOOD -> new GetFoodCommand(dataExchanger, args);
+            case GET_FOOD_REPORT -> new GetFoodReportCommand(dataExchanger, args);
+            default -> new GetFoodByBarcodeCommand(dataExchanger, args);
         };
     }
 

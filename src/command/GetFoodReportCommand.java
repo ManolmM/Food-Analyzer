@@ -127,14 +127,14 @@ public class GetFoodReportCommand implements Command {
         StringBuilder result = new StringBuilder();
         String temp = extractedFood.description();
         if (temp == null) {
-            result.append("No information\n");
+            result.append("Description - No information\n");
         } else {
-            result.append(temp).append("\n");
+            result.append("Description - " + temp).append("\n");
         }
 
         temp = extractedFood.ingredients();
         if (temp == null) {
-            result.append("No information\n");
+            result.append("Ingredients - No information\n");
         } else {
             result.append(temp).append("\n");
         }

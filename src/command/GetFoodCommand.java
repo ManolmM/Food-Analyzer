@@ -40,7 +40,7 @@ public class GetFoodCommand implements Command {
             String extractedPage = client.send(request, HttpResponse.BodyHandlers.ofString()).body();
             page = gson.fromJson(extractedPage, Page.class);
 
-            pageList.append(modifyPageToClient(page));
+            pageList.append(modifyPageToClientOutput(page));
             System.out.println(pageList);
         } while (page.totalPages() > page.currentPage());
 
@@ -88,13 +88,15 @@ public class GetFoodCommand implements Command {
                 .build();
     }
 
-    private String modifyPageToClient(Page page) {
+    private String modifyPageToClientOutput(Page page) {
         StringBuilder output = new StringBuilder();
 
         for (FoodByName item : page.foods()) {
-            output.append(item.fdcId()).append(" ")
-                    .append(item.description()).append(" ")
-                    .append(item.gtinUpc()).append("\n");
+            output.append(item.fdcId()).append(" ").append(item.description()).append(" ");
+            if (item.gtinUpc() == null) {
+                output.append("gtinUpc - No information\n");
+            }
+            output.append(item.gtinUpc()).append("\n");
         }
 
         return output.toString();

@@ -6,12 +6,13 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
-public class FileHandler {
+public class FoodFileHandler {
     private final String fileDataSet = "./src/storage/foods/dataset.csv";
     private final String headLine = "FdcId, Gtin, Description, Ingredients, " +
                                     "Energy, Protein, Total lipid (fat), Carbohydrate, Fiber" + System.lineSeparator();
     private Path filePath;
-    private FileHandler() throws IOException {
+    private BufferedWriter fileWriter;
+    private FoodFileHandler() throws IOException {
         try {
             setUpFile();
         } catch (InvalidPathException e) {
@@ -21,13 +22,13 @@ public class FileHandler {
         }
     }
 
-    public static FileHandler newInstance() throws IOException {
-        return new FileHandler();
+    public static FoodFileHandler newInstance() throws IOException {
+        return new FoodFileHandler();
     }
 
     private void setUpFile() throws IOException {
         filePath = Path.of(fileDataSet);
-        try (var fileWriter = Files.newBufferedWriter(filePath)) {
+        try (var fileWriter = Files.newBufferedWriter(filePath, StandardOpenOption.APPEND)) {
             fileWriter.write(headLine);
             fileWriter.flush();
         } catch (IOException e) {

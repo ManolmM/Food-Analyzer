@@ -2,7 +2,6 @@ package storage.foods;
 
 import exceptions.MissingExtractedDataException;
 import json.extractor.food.fdcid.FoodByFdcId;
-import json.extractor.food.name.FoodByName;
 import json.extractor.food.nutrient.FoodNutrients;
 
 import java.io.IOException;
@@ -12,15 +11,15 @@ import java.util.List;
 public class DataExchanger {
 
     private List<FoodByFdcId> storage;
-    private FileHandler fileHandler;
+    private FoodFileHandler foodFileHandler;
 
-    private DataExchanger(FileHandler fileHandler) {
-        this.fileHandler = fileHandler;
+    private DataExchanger(FoodFileHandler foodFileHandler) {
+        this.foodFileHandler = foodFileHandler;
         storage = new ArrayList<>();
     }
 
-    public static DataExchanger of(FileHandler fileHandler) {
-        return new DataExchanger(fileHandler);
+    public static DataExchanger of(FoodFileHandler foodFileHandler) {
+        return new DataExchanger(foodFileHandler);
     }
     public FoodByFdcId retrieveData(int fdcId) {
         if (storage.isEmpty()) {
@@ -39,7 +38,7 @@ public class DataExchanger {
             throw new MissingExtractedDataException("Empty food by fdcId to write in file");
         }
         String modifiedRecord = modifyData(record);
-        fileHandler.fillFileWithData(modifiedRecord);
+        foodFileHandler.fillFileWithData(modifiedRecord);
         storage.add(record);
     }
 

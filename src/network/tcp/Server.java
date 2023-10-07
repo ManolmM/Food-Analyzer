@@ -24,6 +24,8 @@ public class Server {
 
     private final CommandExecutor commandExecutor;
 
+    //Add a new class that stores the exceptions appeared during the program
+
     private final int port;
     private boolean isServerWorking;
 

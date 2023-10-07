@@ -7,6 +7,7 @@ import json.extractor.food.nutrient.FoodNutrients;
 import json.extractor.food.nutrient.Nutrient;
 import network.http.handler.HttpHandler;
 import storage.foods.DataExchanger;
+import storage.foods.nutrients.NutrientCollection;
 import storage.syntax.http.request.get.GetFoodCommandSyntax;
 import storage.syntax.http.request.get.GetFoodReportCommandSyntax;
 
@@ -18,13 +19,10 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.*;
 
-public class GetFoodReportCommand implements Command {
+import static storage.foods.nutrients.NutrientCollection.energy;
+import static storage.foods.nutrients.NutrientCollection.protein;
 
-    private final String energy = "Energy";
-    private final String protein = "Protein";
-    private final String totalLipids = "Total lipid (fat)";
-    private final String carbohydrates = "Carbohydrate, by difference";
-    private final String fiber = "Fiber, total dietary";
+public class GetFoodReportCommand implements Command {
     private final int fdcIdIndex = 1;
 
     private final int energyIndex = 0;
@@ -99,7 +97,11 @@ public class GetFoodReportCommand implements Command {
 
 
     private FoodByFdcId getNewFoodByFdcId(FoodByFdcId food) {
-        List<String> nutrients = List.of(energy, protein, totalLipids, carbohydrates, fiber); // contains the nutrients in the right order
+        List<String> nutrients = List.of(NutrientCollection.ENERGY,
+                NutrientCollection.PROTEIN,
+                NutrientCollection.TOTAL_LIPIDS,
+                NutrientCollection.CARBOHYDRATES,
+                NutrientCollection.FIBER); // contains the nutrients in the right order
 
         List<FoodNutrients> newFoodNutrients = new ArrayList<>();
         List<FoodNutrients> shuffledNutrientList = food.foodNutrients();

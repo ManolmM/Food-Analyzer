@@ -6,6 +6,8 @@ import command.CommandExecutor;
 import exceptions.NoCommandProvidedException;
 import exceptions.MissingCommandArgumentsException;
 import exceptions.UnknownCommandException;
+import storage.foods.DataExchanger;
+import storage.foods.FoodFileHandler;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -43,6 +45,9 @@ public class Server {
             configureServerSocketChannel(serverSocketChannel, selector);
             this.buffer = ByteBuffer.allocate(BUFFER_SIZE);
             isServerWorking = true;
+
+            FoodFileHandler foodFileHandler = FoodFileHandler.newInstance();
+            DataExchanger dataExchanger = DataExchanger.of(foodFileHandler);
             while (isServerWorking) {
                 try {
                     int readyChannels = selector.select();
@@ -60,7 +65,7 @@ public class Server {
                             try {
                                 String clientInput = getClientInput(clientChannel);
                                 System.out.println("Client request: " + clientInput);
-                                Command inputCommand = CommandCreator.newCommand(clientInput);
+                                Command inputCommand = CommandCreator.newCommand(dataExchanger, clientInput);
                                 commandExecutor.takeCommand(inputCommand);
                                 String output = commandExecutor.placeCommand();
                                 writeClientOutput(clientChannel, output);

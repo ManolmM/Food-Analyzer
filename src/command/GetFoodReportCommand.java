@@ -19,8 +19,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.*;
 
-import static storage.foods.nutrients.NutrientCollection.energy;
-import static storage.foods.nutrients.NutrientCollection.protein;
 
 public class GetFoodReportCommand implements Command {
     private final int fdcIdIndex = 1;

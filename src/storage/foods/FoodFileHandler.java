@@ -3,6 +3,7 @@ package storage.foods;
 import json.extractor.food.fdcid.FoodByFdcId;
 import json.extractor.food.nutrient.FoodNutrients;
 import json.extractor.food.nutrient.Nutrient;
+import storage.foods.nutrients.NutrientCollection;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -34,12 +35,18 @@ public class FoodFileHandler {
     }
 
     private void setUpFile() throws IOException {
-        filePath = Path.of(fileDataSet);
-        try (var fileWriter = Files.newBufferedWriter(filePath)) {
-            fileWriter.write(headLine);
-            fileWriter.flush();
+        try {
+            filePath = Path.of(fileDataSet);
+            if (countFileLines() == 0) {
+                try (var fileWriter = new BufferedWriter(new FileWriter(fileDataSet))) {
+                    fileWriter.write(headLine);
+                    fileWriter.flush();
+                } catch (IOException e) {
+                    throw new IOException("Unable to open dataset file.");
+                }
+            }
         } catch (IOException e) {
-            throw new IOException("Unable to open dataset file.");
+            throw e;
         }
     }
 
@@ -70,8 +77,12 @@ public class FoodFileHandler {
         }
     }
 
-    public List<FoodByFdcId> parseDataFromFile() throws FileNotFoundException, IOException{
+    public List<FoodByFdcId> parseDataFromFile() throws FileNotFoundException, IOException {
         try (var dataInput = new BufferedReader(new FileReader(fileDataSet))) {
+            List<String> nutrientList = List.of(NutrientCollection.ENERGY, NutrientCollection.PROTEIN,
+                                             NutrientCollection.TOTAL_LIPIDS, NutrientCollection.CARBOHYDRATES,
+                                             NutrientCollection.FIBER);
+
             List<FoodByFdcId> storage = dataInput.lines().skip(1)
                     .map(line -> {
                         String[] fields = line.split(";");
@@ -82,17 +93,22 @@ public class FoodFileHandler {
                         String ingredients = fields[3];
 
                         List<FoodNutrients> foodNutrients = new ArrayList<>();
-                        int fieldsSize = fields.length;
-                        for (int i = 4; i < fieldsSize - 1; i++) {
-                            Nutrient nutrient = new Nutrient("Energy")
+                        int nutrientListSize = nutrientList.size();
+                        int offset = 4;
+                        for (int i = 0; i < nutrientListSize; i++) {
+                            String nutrientName = nutrientList.get(i);
+                            double amount = Double.parseDouble(fields[offset + i]);
+                            Nutrient newNutrient = new Nutrient(nutrientName);
+                            foodNutrients.add(new FoodNutrients(newNutrient, amount));
                         }
-                    })
-        }
+                        return new FoodByFdcId(fdcId, description, ingredients, gtinUpc, foodNutrients);
+                    }).toList();
+
             return storage;
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
     }
+}

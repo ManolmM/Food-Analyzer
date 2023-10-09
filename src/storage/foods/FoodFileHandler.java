@@ -16,13 +16,13 @@ import java.util.List;
 import static java.util.stream.Collectors.toList;
 
 public class FoodFileHandler {
-    private final String fileDataSet = "./src/storage/foods/dataset.csv";
+    //private final String fileDataSet = "./src/storage/foods/dataset.csv";
     private final String headLine = "FdcId, Gtin, Description, Ingredients, " +
                                     "Energy, Protein, Total lipid (fat), Carbohydrate, Fiber" + System.lineSeparator();
     private Path filePath;
-    private FoodFileHandler() throws IOException {
+    private FoodFileHandler(Path filePath) throws IOException {
         try {
-            setUpFile();
+            setUpFile(filePath);
         } catch (InvalidPathException e) {
             throw e;
         } catch (IOException e) {
@@ -30,15 +30,15 @@ public class FoodFileHandler {
         }
     }
 
-    public static FoodFileHandler newInstance() throws IOException {
-        return new FoodFileHandler();
+    public static FoodFileHandler newInstance(Path filePath) throws IOException {
+        return new FoodFileHandler(filePath);
     }
 
-    private void setUpFile() throws IOException {
+    private void setUpFile(Path fileDataSet) throws IOException {
         try {
-            filePath = Path.of(fileDataSet);
+            filePath = fileDataSet;
             if (countFileLines() == 0) {
-                try (var fileWriter = new BufferedWriter(new FileWriter(fileDataSet))) {
+                try (var fileWriter = Files.newBufferedWriter(filePath)) {
                     fileWriter.write(headLine);
                     fileWriter.flush();
                 } catch (IOException e) {
@@ -60,12 +60,8 @@ public class FoodFileHandler {
         }
     }
 
-    public boolean checkExistence() {
-        throw new UnsupportedOperationException("");
-    }
-
-    public int countFileLines() throws IOException {
-        try (var reader = new BufferedReader(new FileReader(fileDataSet))) {
+    protected int countFileLines() throws IOException {
+        try (var reader = Files.newBufferedReader(filePath)) {
             int lines = 0;
             while (reader.readLine() != null) {
                 lines++;
@@ -78,19 +74,23 @@ public class FoodFileHandler {
     }
 
     public List<FoodByFdcId> parseDataFromFile() throws FileNotFoundException, IOException {
-        try (var dataInput = new BufferedReader(new FileReader(fileDataSet))) {
+        try (var dataInput = Files.newBufferedReader(filePath)) {
             List<String> nutrientList = List.of(NutrientCollection.ENERGY, NutrientCollection.PROTEIN,
                                              NutrientCollection.TOTAL_LIPIDS, NutrientCollection.CARBOHYDRATES,
                                              NutrientCollection.FIBER);
+            int fdcIdIndex = 0;
+            int gtinUpcIndex = 1;
+            int descriptionIndex = 2;
+            int ingredientsIndex = 3;
 
             List<FoodByFdcId> storage = dataInput.lines().skip(1)
                     .map(line -> {
                         String[] fields = line.split(";");
 
-                        int fdcId = Integer.parseInt(fields[0]);
-                        String gtinUpc = fields[1];
-                        String description = fields[2];
-                        String ingredients = fields[3];
+                        int fdcId = Integer.parseInt(fields[fdcIdIndex]);
+                        String gtinUpc = fields[gtinUpcIndex];
+                        String description = fields[descriptionIndex];
+                        String ingredients = fields[ingredientsIndex];
 
                         List<FoodNutrients> foodNutrients = new ArrayList<>();
                         int nutrientListSize = nutrientList.size();

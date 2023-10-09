@@ -8,17 +8,23 @@ import exceptions.MissingCommandArgumentsException;
 import exceptions.UnknownCommandException;
 import storage.foods.DataExchanger;
 import storage.foods.FoodFileHandler;
+import storage.messages.exceptions.ExceptionFileHandler;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Iterator;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Server {
     private static final int BUFFER_SIZE = 10000;
@@ -26,15 +32,19 @@ public class Server {
 
     private final CommandExecutor commandExecutor;
 
+    private ExceptionFileHandler exceptionFileHandler = ExceptionFileHandler.newInstance();
     //Add a new class that stores the exceptions appeared during the program
 
+    private Path filePath;
     private final int port;
     private boolean isServerWorking;
 
     private ByteBuffer buffer;
     private Selector selector;
+    private ExecutorService executorService = Executors.newCachedThreadPool();
 
-    public Server(int port, CommandExecutor commandExecutor) {
+    public Server(Path filePath, int port, CommandExecutor commandExecutor) {
+        this.filePath = filePath;
         this.port = port;
         this.commandExecutor = commandExecutor;
     }
@@ -46,7 +56,7 @@ public class Server {
             this.buffer = ByteBuffer.allocate(BUFFER_SIZE);
             isServerWorking = true;
 
-            FoodFileHandler foodFileHandler = FoodFileHandler.newInstance();
+            FoodFileHandler foodFileHandler = FoodFileHandler.newInstance(filePath);
             DataExchanger dataExchanger = DataExchanger.of(foodFileHandler);
             while (isServerWorking) {
                 try {
@@ -63,12 +73,21 @@ public class Server {
                             SocketChannel clientChannel = (SocketChannel) key.channel();
                             String clientErrorMessage;
                             try {
+                                /*Socket socket = clientChannel.socket();
+                                InetAddress clientAddress = socket.getInetAddress();
+                                int clientPort = socket.getPort();*/
                                 String clientInput = getClientInput(clientChannel);
                                 System.out.println("Client request: " + clientInput);
                                 Command inputCommand = CommandCreator.newCommand(dataExchanger, clientInput);
                                 commandExecutor.takeCommand(inputCommand);
                                 String output = commandExecutor.placeCommand();
-                                writeClientOutput(clientChannel, output);
+                                executorService.submit(() -> {
+                                    try {
+                                        writeClientOutput(clientChannel, output);
+                                    } catch (IOException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                });
 
                             } catch (NoCommandProvidedException e) {
                                 clientErrorMessage = "No command is provided.";
@@ -88,6 +107,7 @@ public class Server {
                             } catch (IOException e) {
                                 if (e.getMessage().equals("Unable to write new data to the dataset file.")) {
                                     //TODO Add method that stores this exception to a file
+                                    //exceptionFileHandler.fillFileWithExceptionMessageFromClient(clientPort, clientAddress);
                                 }
                                 if (e.getMessage().equals("Unable to open dataset file.")) {
                                     //TODO Add method that stores this exception to a file
@@ -156,8 +176,9 @@ public class Server {
     }
 
     public static void main(String[] args) {
+        Path path = Path.of("./src/storage/foods/dataset.csv");
         CommandExecutor executor = CommandExecutor.newInstance();
-        Server server = new Server(7777, executor);
+        Server server = new Server(path, 7777, executor);
         server.start();
     }
 }

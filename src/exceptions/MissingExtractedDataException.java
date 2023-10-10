@@ -1,5 +1,6 @@
 package exceptions;
 
+
 public class MissingExtractedDataException extends Exception {
     public MissingExtractedDataException(String message) {
         super(message);

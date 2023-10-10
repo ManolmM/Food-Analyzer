@@ -36,12 +36,22 @@ public class Server {
     private Selector selector;
     private ExecutorService executorService = Executors.newCachedThreadPool();
 
-    public Server(Path filePath, int port, CommandExecutor commandExecutor) {
+    private Server(Path filePath, int port, CommandExecutor commandExecutor) {
         this.filePath = filePath;
         this.port = port;
         this.commandExecutor = commandExecutor;
     }
 
+    public static Server of(Path filePath, int port, CommandExecutor commandExecutor) {
+        return new Server(filePath, port, commandExecutor);
+    }
+
+    /**
+     * Configure the server attributes.
+     * Available to connect with new clients.
+     * Sends and receives data to each client.
+     * Extracts data from REST API or a file when a client provide a appropriate commands.
+     */
     public void start() {
         try (ServerSocketChannel serverSocketChannel = ServerSocketChannel.open()) {
             selector = Selector.open();
@@ -121,6 +131,10 @@ public class Server {
         channel.register(selector, SelectionKey.OP_ACCEPT);
     }
 
+    /**
+     * Reads the client's input from buffer.
+     * @return String
+     */
     private String getClientInput(SocketChannel clientChannel) throws IOException, NoCommandProvidedException {
         buffer.clear();
 
@@ -138,6 +152,10 @@ public class Server {
         return new String(clientInputBytes, StandardCharsets.UTF_8);
     }
 
+
+    /**
+     * Writes the output in the buffer.
+     */
     private void writeClientOutput(SocketChannel clientChannel, String output) throws IOException {
         buffer.clear();
         buffer.put(output.getBytes());
@@ -146,6 +164,10 @@ public class Server {
         clientChannel.write(buffer);
     }
 
+    /**
+     * Accepts the incoming client connections.
+     *
+     */
     private void accept(Selector selector, SelectionKey key) throws IOException {
         ServerSocketChannel sockChannel = (ServerSocketChannel) key.channel();
         SocketChannel accept = sockChannel.accept();

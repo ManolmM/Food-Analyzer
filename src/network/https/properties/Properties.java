@@ -1,7 +1,5 @@
 package network.https.properties;
 
-import java.net.http.HttpClient;
-
 public class Properties {
     public static final String SCHEME = "https";
     public static final String HOST_FOOD_API = "api.nal.usda.gov";

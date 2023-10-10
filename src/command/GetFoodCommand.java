@@ -23,13 +23,21 @@ public class GetFoodCommand implements Command {
         this.exchanger = exchanger;
         this.command = commandInput;
     }
+
+    /**
+     * Executes a command of type: get-food "branded food name".
+     *
+     * @return String representing information from the REST API.
+     */
     @Override
     public String executeRequest() throws IOException, InterruptedException, URISyntaxException {
+
+        // Sets the HttpRequest and HttpClient instances
         HttpRequest request;
         HttpClient client = HttpClient.newBuilder().build();
         Gson gson = new Gson();
 
-        int pageNumberRequest = 1;
+        int pageNumberRequest = 1; // Always starts from page 1
         Page page;
         StringBuilder pageList = new StringBuilder();
         do {
@@ -40,17 +48,23 @@ public class GetFoodCommand implements Command {
             String extractedPage = client.send(request, HttpResponse.BodyHandlers.ofString()).body();
             page = gson.fromJson(extractedPage, Page.class);
 
-            if (page.totalPages() == 0) {
+            if (page.totalPages() == 0) {  // checks whether the REST API contains any pages with information
                 String resultNotFountMessage = "No results are found";
                 return resultNotFountMessage;
             }
-            pageList.append(modifyPageToClientOutput(page));
+            pageList.append(modifyPageToClientOutput(page)); // Combines the pages' content into a whole String
 
         } while (page.totalPages() > page.currentPage());
 
         return pageList.toString();
     }
 
+
+    /**
+     * Returns the separated client's command to a new String.
+     * Omits the type of the command at index zero in our command list.
+     * @return String
+     */
     private String mergeCommandArguments() {
         StringBuilder argsBuilder = new StringBuilder();
 
@@ -61,6 +75,11 @@ public class GetFoodCommand implements Command {
         return argsBuilder.toString();
     }
 
+
+    /**
+     * Returns URI configured in terms of the REST documentation.
+     * @return URI
+     */
     private URI configureUri(String pageNumber) throws URISyntaxException {
         return new URI(Properties.SCHEME,
                 Properties.HOST_FOOD_API,
@@ -69,12 +88,21 @@ public class GetFoodCommand implements Command {
                 null);
     }
 
+    /**
+     * Returns a query of type: query= + client's input arguments + pageNumber= + queryPage.
+     * @return String
+     */
     private String configureQuery(String queryPage) {
         return GetFoodCommandSyntax.REQUIRED_API_PARAMETER_QUERY +
                 mergeCommandArguments() +
                 queryPage +
                 GetFoodCommandSyntax.REQUIRED_ALL_WORDS_PARAMETER;
     }
+
+
+    /**
+     * Helper method to modify URI Page
+     */
     private String modifyUriQueryPageNumber(int page) {
         StringBuilder buildPage = new StringBuilder();
         buildPage.append(GetFoodCommandSyntax.PAGE_NUMBER);
@@ -84,6 +112,10 @@ public class GetFoodCommand implements Command {
         return buildPage.toString();
     }
 
+    /**
+     * Returns the appropriate HTTP GET request that contains client's query.
+     * @return HttpRequest
+     */
     private HttpRequest configureRequest(URI uri) {
         return HttpRequest.newBuilder()
                 .header(GetFoodCommandSyntax.API_KEY_NAME, GetFoodCommandSyntax.API_KEY_VALUE)
@@ -92,6 +124,11 @@ public class GetFoodCommand implements Command {
                 .build();
     }
 
+    /**
+     * Returns the modified page from the REST API.
+     * The content is presented in a human-readable format that is sent to the client from our server.
+     * @return String
+     * */
     private String modifyPageToClientOutput(Page page) {
         StringBuilder output = new StringBuilder();
 

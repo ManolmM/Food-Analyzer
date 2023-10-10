@@ -3,7 +3,7 @@ package command;
 import com.google.gson.Gson;
 import json.extractor.food.name.FoodByName;
 import json.extractor.page.Page;
-import network.http.handler.HttpHandler;
+import network.https.properties.Properties;
 import storage.foods.DataExchanger;
 import storage.syntax.http.request.get.GetFoodCommandSyntax;
 
@@ -62,8 +62,8 @@ public class GetFoodCommand implements Command {
     }
 
     private URI configureUri(String pageNumber) throws URISyntaxException {
-        return new URI(HttpHandler.SCHEME,
-                HttpHandler.HOST_FOOD_API,
+        return new URI(Properties.SCHEME,
+                Properties.HOST_FOOD_API,
                 GetFoodCommandSyntax.FOODS_PATH,
                 pageNumber,
                 null);

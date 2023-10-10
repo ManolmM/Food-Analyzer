@@ -6,15 +6,13 @@ import command.CommandExecutor;
 import exceptions.NoCommandProvidedException;
 import exceptions.MissingCommandArgumentsException;
 import exceptions.UnknownCommandException;
+import network.https.properties.Properties;
 import storage.foods.DataExchanger;
-import storage.foods.FoodFileHandler;
-import storage.messages.exceptions.ExceptionFileHandler;
+import storage.foods.FileFoodHandler;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -27,13 +25,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server {
-    private static final int BUFFER_SIZE = 10000;
-    private static final String HOST = "localhost";
-
+    private static final int BUFFER_SIZE = 32768;
     private final CommandExecutor commandExecutor;
-
-    private ExceptionFileHandler exceptionFileHandler = ExceptionFileHandler.newInstance();
-    //Add a new class that stores the exceptions appeared during the program
 
     private Path filePath;
     private final int port;
@@ -56,8 +49,8 @@ public class Server {
             this.buffer = ByteBuffer.allocate(BUFFER_SIZE);
             isServerWorking = true;
 
-            FoodFileHandler foodFileHandler = FoodFileHandler.newInstance(filePath);
-            DataExchanger dataExchanger = DataExchanger.of(foodFileHandler);
+            FileFoodHandler fileFoodHandler = FileFoodHandler.newInstance(filePath);
+            DataExchanger dataExchanger = DataExchanger.of(fileFoodHandler);
             while (isServerWorking) {
                 try {
                     int readyChannels = selector.select();
@@ -73,9 +66,7 @@ public class Server {
                             SocketChannel clientChannel = (SocketChannel) key.channel();
                             String clientErrorMessage;
                             try {
-                                /*Socket socket = clientChannel.socket();
-                                InetAddress clientAddress = socket.getInetAddress();
-                                int clientPort = socket.getPort();*/
+
                                 String clientInput = getClientInput(clientChannel);
                                 System.out.println("Client request: " + clientInput);
                                 Command inputCommand = CommandCreator.newCommand(dataExchanger, clientInput);
@@ -93,25 +84,14 @@ public class Server {
                                 clientErrorMessage = "No command is provided.";
                                 writeClientOutput(clientChannel, clientErrorMessage);
                                 break;
-
                             } catch (UnknownCommandException e) {
                                 clientErrorMessage = "Unknown or invalid command is provided.";
                                 writeClientOutput(clientChannel, clientErrorMessage);
                                 break;
-
                             } catch (MissingCommandArgumentsException e) {
                                 clientErrorMessage = "Command not completed. Missing arguments.";
                                 writeClientOutput(clientChannel, clientErrorMessage);
                                 break;
-
-                            } catch (IOException e) {
-                                if (e.getMessage().equals("Unable to write new data to the dataset file.")) {
-                                    //TODO Add method that stores this exception to a file
-                                    //exceptionFileHandler.fillFileWithExceptionMessageFromClient(clientPort, clientAddress);
-                                }
-                                if (e.getMessage().equals("Unable to open dataset file.")) {
-                                    //TODO Add method that stores this exception to a file
-                                }
                             }
                         } else if (key.isAcceptable()) {
                             accept(selector, key);
@@ -136,7 +116,7 @@ public class Server {
     }
 
     private void configureServerSocketChannel(ServerSocketChannel channel, Selector selector) throws IOException {
-        channel.bind(new InetSocketAddress(HOST, this.port));
+        channel.bind(new InetSocketAddress(Properties.HOST, this.port));
         channel.configureBlocking(false);
         channel.register(selector, SelectionKey.OP_ACCEPT);
     }
@@ -173,12 +153,5 @@ public class Server {
         accept.configureBlocking(false);
         accept.register(selector, SelectionKey.OP_READ);
         System.out.println("New client connected.");
-    }
-
-    public static void main(String[] args) {
-        Path path = Path.of("./src/storage/foods/dataset.csv");
-        CommandExecutor executor = CommandExecutor.newInstance();
-        Server server = new Server(path, 7777, executor);
-        server.start();
     }
 }

@@ -1,5 +1,7 @@
 package network.tcp;
 
+import network.https.properties.Properties;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -7,11 +9,7 @@ import java.nio.channels.SocketChannel;
 import java.util.Scanner;
 
 public class Client {
-
-    private static final int SERVER_PORT = 7777;
-    private static final String SERVER_HOST = "localhost";
-    private static final int BUFFER_SIZE = 10000;
-
+    private static final int BUFFER_SIZE = 32768;
     private static ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
 
     public static void main(String[] args) {
@@ -19,7 +17,7 @@ public class Client {
         try (SocketChannel socketChannel = SocketChannel.open();
              Scanner scanner = new Scanner(System.in)) {
 
-            socketChannel.connect(new InetSocketAddress(SERVER_HOST, SERVER_PORT));
+            socketChannel.connect(new InetSocketAddress(Properties.SERVER_HOST, Properties.SERVER_PORT));
 
             System.out.println("Connected to the server.");
 
@@ -45,9 +43,6 @@ public class Client {
                 byte[] byteArray = new byte[buffer.remaining()];
                 buffer.get(byteArray);
                 String reply = new String(byteArray, "UTF-8"); // buffer drain
-
-                // if buffer is a non-direct one, is has a wrapped array and we can get it
-                //String reply = new String(buffer.array(), 0, buffer.position(), "UTF-8"); // buffer drain
 
                 System.out.println("The server replied:\n" + reply);
             }

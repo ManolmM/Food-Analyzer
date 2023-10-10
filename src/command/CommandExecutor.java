@@ -16,6 +16,10 @@ public class CommandExecutor {
     }
 
 
+    /**
+     * Stores the commands passed
+     *
+     **/
     public void takeCommand(Command c) {
         if (c == null) {
             return;
@@ -24,11 +28,16 @@ public class CommandExecutor {
         commands.add(c);
     }
 
+
+    /**
+     * Executes the latest command added.
+     *
+     * @return modified response information from the REST API
+     * @throws
+     **/
     public String placeCommand() {
         if (commands.isEmpty()) {
-            throw new UnsupportedOperationException("");
-            //System.out.println("No command yet taken");
-            //return;
+            throw new IllegalStateException("Trying to execute empty list of commands");
         }
 
         try {
@@ -36,7 +45,7 @@ public class CommandExecutor {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-        throw new UnsupportedOperationException("");
+        throw new IllegalStateException("Unable to execute latest command");
     }
 
 }

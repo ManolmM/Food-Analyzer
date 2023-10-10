@@ -14,7 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FileFoodHandler {
-    //private final String fileDataSet = "./src/storage/foods/dataset.txt";
+
+    // The headline of the file that stores responses from the REST API.
     private final String headLine = "FdcId, Gtin, Description, Ingredients, " +
                                     "Energy, Protein, Total lipid (fat), Carbohydrate, Fiber" + System.lineSeparator();
     private Path filePath;
@@ -32,6 +33,10 @@ public class FileFoodHandler {
         return new FileFoodHandler(filePath);
     }
 
+    /**
+     * if the file is empty, writes the headline.
+     * @throws IOException  if the file cannot be open.
+     */
     private void setUpFile(Path fileDataSet) throws IOException {
         try {
             filePath = fileDataSet;
@@ -48,6 +53,10 @@ public class FileFoodHandler {
         }
     }
 
+    /**
+     * Writes a new record representing food extracted from the REST API.
+     * @throws IOException  if a problem occurs while writing to the file.
+     */
     public void fillFileWithData(String data) throws IOException {
         try (var fileWrite = Files.newBufferedWriter(filePath, StandardOpenOption.APPEND)) {
             fileWrite.write(data);
@@ -58,6 +67,11 @@ public class FileFoodHandler {
         }
     }
 
+    /**
+     * Counts the line of the file. Includes the headline of the file.
+     * @return number of lines in the file
+     * @throws IOException  if there is a problem while reading the file
+     */
     protected int countFileLines() throws IOException {
         try (var reader = Files.newBufferedReader(filePath)) {
             int lines = 0;
@@ -71,6 +85,13 @@ public class FileFoodHandler {
         }
     }
 
+
+    /**
+     * Extract all record of food from the file.
+     * @return List of FoodByFdcId items
+     * @throws IOException
+     * @throws FileNotFoundException if the file cannot be found.
+     */
     public List<FoodByFdcId> parseDataFromFile() throws IOException {
         try (var dataInput = Files.newBufferedReader(filePath)) {
             List<String> nutrientList = List.of(NutrientCollection.ENERGY, NutrientCollection.PROTEIN,

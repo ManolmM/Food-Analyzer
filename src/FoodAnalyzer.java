@@ -4,13 +4,13 @@ import network.tcp.Server;
 
 import java.nio.file.Path;
 
-public class FoodAnalyzerAPI {
+public class FoodAnalyzer {
 
     public static void main(String[] args) {
 
         Path path = Path.of("./src/storage/foods/dataset.txt");
         CommandExecutor executor = CommandExecutor.newInstance();
-        Server server = new Server(path, Properties.SERVER_PORT, executor);
+        Server server = Server.of(path, Properties.SERVER_PORT, executor);
         server.start();
 
         //get-food-report 2032440

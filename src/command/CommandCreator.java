@@ -15,9 +15,9 @@ public class CommandCreator {
     private final static int COMMAND_TYPE_INDEX = 0;
 
     /**
-     * Checks the correctness of client's command.
+     * Checks if the client's input command is correctly supplied.
      *
-     * @return List of String representing the command
+     * @return List of String representing the command.
      **/
     private static List<String> getCommandArguments(String clientInput) throws NoCommandProvidedException,
                                                                                UnknownCommandException,
@@ -40,7 +40,11 @@ public class CommandCreator {
         return commandArguments;
     }
 
-
+    /**
+     * Checks if the client's input command is correctly supplied.
+     *
+     * @return CommandType
+     **/
     private static CommandType getType(String commandType) {
         return switch (commandType) {
             case "get-food" -> CommandType.GET_FOOD;
@@ -52,7 +56,7 @@ public class CommandCreator {
     /**
      * Creates new command from given client's input.
      *
-     * @return new Command type
+     * @return Command of specified type
      **/
     public static Command newCommand(DataExchanger dataExchanger, String clientInput) throws NoCommandProvidedException,
                                                                 UnknownCommandException,

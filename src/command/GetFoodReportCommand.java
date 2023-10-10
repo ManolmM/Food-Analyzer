@@ -35,6 +35,12 @@ public class GetFoodReportCommand implements Command {
         this.exchanger = exchanger;
         this.command = commandInput;
     }
+
+    /**
+     * Executes the HTTP GET request to the REST API.
+     * Returns human-readable representation about food.
+     * @return String
+     */
     @Override
     public String executeRequest() throws URISyntaxException, IOException, InterruptedException, MissingExtractedDataException {
 
@@ -62,6 +68,10 @@ public class GetFoodReportCommand implements Command {
         }
     }
 
+    /**
+     * Returns URI configured in terms of the REST documentation.
+     * @return URI
+     */
     private URI configureUri() throws URISyntaxException {
         return new URI(Properties.SCHEME,
                 Properties.HOST_FOOD_API,
@@ -75,6 +85,10 @@ public class GetFoodReportCommand implements Command {
         return GetFoodReportCommandSyntax.PREFIX_PATH_FOOD + command.get(fdcIdIndex);
     }
 
+    /**
+     * Returns a query of type: query= + client's input arguments + pageNumber= + queryPage.
+     * @return String
+     */
     private String configureQuery() {
         StringBuilder query = new StringBuilder();
         return  query.append(GetFoodReportCommandSyntax.ENERGY_NUMBER_PARAMETER).append("&")
@@ -84,6 +98,11 @@ public class GetFoodReportCommand implements Command {
                 .append(GetFoodReportCommandSyntax.FIBER_NUMBER_PARAMETER)
                 .toString();
     }
+
+    /**
+     * Returns the appropriate HTTP GET request that contains client's query.
+     * @return HttpRequest
+     */
     private HttpRequest configureRequest(URI uri) {
         return HttpRequest.newBuilder()
                 .header(GetFoodReportCommandSyntax.API_KEY_NAME, GetFoodReportCommandSyntax.API_KEY_VALUE)
@@ -93,12 +112,18 @@ public class GetFoodReportCommand implements Command {
     }
 
 
+    /**
+     * Transforms the order of the nutrients in the given food.
+     * @return FoodByFdcId
+     */
     private FoodByFdcId getNewFoodByFdcId(FoodByFdcId food) {
+
+        // The desired order of the nutrients.
         List<String> nutrients = List.of(NutrientCollection.ENERGY,
                 NutrientCollection.PROTEIN,
                 NutrientCollection.TOTAL_LIPIDS,
                 NutrientCollection.CARBOHYDRATES,
-                NutrientCollection.FIBER); // contains the nutrients in the right order
+                NutrientCollection.FIBER);
 
         List<FoodNutrients> newFoodNutrients = new ArrayList<>();
         List<FoodNutrients> shuffledNutrientList = food.foodNutrients();
@@ -122,6 +147,10 @@ public class GetFoodReportCommand implements Command {
     }
 
 
+    /**
+     * Returns a human-readable information about the food.
+     * @return String
+     */
     private String clientOutput(FoodByFdcId extractedFood) {
         StringBuilder result = new StringBuilder();
         String temp = extractedFood.description();

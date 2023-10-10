@@ -5,10 +5,9 @@ import exceptions.MissingExtractedDataException;
 import json.extractor.food.fdcid.FoodByFdcId;
 import json.extractor.food.nutrient.FoodNutrients;
 import json.extractor.food.nutrient.Nutrient;
-import network.http.handler.HttpHandler;
+import network.https.properties.Properties;
 import storage.foods.DataExchanger;
 import storage.foods.nutrients.NutrientCollection;
-import storage.syntax.http.request.get.GetFoodCommandSyntax;
 import storage.syntax.http.request.get.GetFoodReportCommandSyntax;
 
 import java.io.IOException;
@@ -64,8 +63,8 @@ public class GetFoodReportCommand implements Command {
     }
 
     private URI configureUri() throws URISyntaxException {
-        return new URI(HttpHandler.SCHEME,
-                HttpHandler.HOST_FOOD_API,
+        return new URI(Properties.SCHEME,
+                Properties.HOST_FOOD_API,
                 configurePath(),
                 configureQuery(),
                 null);
@@ -87,7 +86,7 @@ public class GetFoodReportCommand implements Command {
     }
     private HttpRequest configureRequest(URI uri) {
         return HttpRequest.newBuilder()
-                .header(GetFoodReportCommandSyntax.API_KEY_NAME, GetFoodCommandSyntax.API_KEY_VALUE)
+                .header(GetFoodReportCommandSyntax.API_KEY_NAME, GetFoodReportCommandSyntax.API_KEY_VALUE)
                 .uri(uri)
                 .GET()
                 .build();

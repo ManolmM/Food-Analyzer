@@ -5,7 +5,6 @@ import exceptions.NoCommandProvidedException;
 import exceptions.MissingCommandArgumentsException;
 import exceptions.UnknownCommandException;
 import storage.foods.DataExchanger;
-import storage.foods.FoodFileHandler;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -46,7 +45,6 @@ public class CommandCreator {
         return switch (commandType) {
             case "get-food" -> CommandType.GET_FOOD;
             case "get-food-report" -> CommandType.GET_FOOD_REPORT;
-            case "get-food-by-barcode" -> CommandType.GET_FOOD_BY_BARCODE;
             default -> CommandType.UNKNOWN;
         };
     }
@@ -65,8 +63,7 @@ public class CommandCreator {
         CommandType type = getType(args.get(COMMAND_TYPE_INDEX));
         return switch (type) {
             case GET_FOOD -> new GetFoodCommand(dataExchanger, args);
-            case GET_FOOD_REPORT -> new GetFoodReportCommand(dataExchanger, args);
-            default -> new GetFoodByBarcodeCommand(dataExchanger, args);
+            default -> new GetFoodReportCommand(dataExchanger, args);
         };
     }
 

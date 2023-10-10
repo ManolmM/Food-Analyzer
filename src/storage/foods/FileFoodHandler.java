@@ -13,14 +13,12 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.stream.Collectors.toList;
-
-public class FoodFileHandler {
-    //private final String fileDataSet = "./src/storage/foods/dataset.csv";
+public class FileFoodHandler {
+    //private final String fileDataSet = "./src/storage/foods/dataset.txt";
     private final String headLine = "FdcId, Gtin, Description, Ingredients, " +
                                     "Energy, Protein, Total lipid (fat), Carbohydrate, Fiber" + System.lineSeparator();
     private Path filePath;
-    private FoodFileHandler(Path filePath) throws IOException {
+    private FileFoodHandler(Path filePath) throws IOException {
         try {
             setUpFile(filePath);
         } catch (InvalidPathException e) {
@@ -30,8 +28,8 @@ public class FoodFileHandler {
         }
     }
 
-    public static FoodFileHandler newInstance(Path filePath) throws IOException {
-        return new FoodFileHandler(filePath);
+    public static FileFoodHandler newInstance(Path filePath) throws IOException {
+        return new FileFoodHandler(filePath);
     }
 
     private void setUpFile(Path fileDataSet) throws IOException {
@@ -73,15 +71,15 @@ public class FoodFileHandler {
         }
     }
 
-    public List<FoodByFdcId> parseDataFromFile() throws FileNotFoundException, IOException {
+    public List<FoodByFdcId> parseDataFromFile() throws IOException {
         try (var dataInput = Files.newBufferedReader(filePath)) {
             List<String> nutrientList = List.of(NutrientCollection.ENERGY, NutrientCollection.PROTEIN,
                                              NutrientCollection.TOTAL_LIPIDS, NutrientCollection.CARBOHYDRATES,
                                              NutrientCollection.FIBER);
-            int fdcIdIndex = 0;
-            int gtinUpcIndex = 1;
-            int descriptionIndex = 2;
-            int ingredientsIndex = 3;
+            final int fdcIdIndex = 0;
+            final int gtinUpcIndex = 1;
+            final int descriptionIndex = 2;
+            final int ingredientsIndex = 3;
 
             List<FoodByFdcId> storage = dataInput.lines().skip(1)
                     .map(line -> {
@@ -94,7 +92,7 @@ public class FoodFileHandler {
 
                         List<FoodNutrients> foodNutrients = new ArrayList<>();
                         int nutrientListSize = nutrientList.size();
-                        int offset = 4;
+                        final int offset = 4;
                         for (int i = 0; i < nutrientListSize; i++) {
                             String nutrientName = nutrientList.get(i);
                             double amount = Double.parseDouble(fields[offset + i]);
@@ -106,9 +104,10 @@ public class FoodFileHandler {
 
             return storage;
         } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+            throw new FileNotFoundException("File " + filePath.getFileName() +
+                    "not found when method parseDataFromFile invoked");
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw e;
         }
     }
 }

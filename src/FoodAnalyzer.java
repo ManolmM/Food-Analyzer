@@ -12,8 +12,5 @@ public class FoodAnalyzer {
         CommandExecutor executor = CommandExecutor.newInstance();
         Server server = Server.of(path, Properties.SERVER_PORT, executor);
         server.start();
-
-        //get-food-report 2032440
-        //get-food-report 2110388
     }
 }

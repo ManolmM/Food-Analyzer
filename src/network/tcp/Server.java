@@ -93,14 +93,17 @@ public class Server {
                             } catch (NoCommandProvidedException e) {
                                 clientErrorMessage = "No command is provided.";
                                 writeClientOutput(clientChannel, clientErrorMessage);
+                                keyIterator.remove();
                                 break;
                             } catch (UnknownCommandException e) {
                                 clientErrorMessage = "Unknown or invalid command is provided.";
                                 writeClientOutput(clientChannel, clientErrorMessage);
+                                keyIterator.remove();
                                 break;
                             } catch (MissingCommandArgumentsException e) {
                                 clientErrorMessage = "Command not completed. Missing arguments.";
                                 writeClientOutput(clientChannel, clientErrorMessage);
+                                keyIterator.remove();
                                 break;
                             }
                         } else if (key.isAcceptable()) {

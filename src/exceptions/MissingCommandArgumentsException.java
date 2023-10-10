@@ -1,5 +1,6 @@
 package exceptions;
 
+
 public class MissingCommandArgumentsException extends Exception {
     public MissingCommandArgumentsException(String message) {
         super(message);

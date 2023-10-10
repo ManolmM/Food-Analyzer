@@ -1,5 +1,6 @@
 package exceptions;
 
+
 public class NoCommandProvidedException extends Exception {
 
     public NoCommandProvidedException(String message) {

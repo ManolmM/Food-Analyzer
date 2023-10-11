@@ -41,7 +41,11 @@ public class CommandExecutor {
         }
 
         try {
-            return commands.get(commands.size() - 1).executeRequest();
+            int latestCommandIndex = commands.size() - 1;
+            if (latestCommandIndex > 0) {
+                commands.remove(latestCommandIndex - 1);
+            }
+            return commands.get(latestCommandIndex).executeRequest();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

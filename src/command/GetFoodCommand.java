@@ -18,9 +18,8 @@ import java.util.List;
 public class GetFoodCommand implements Command {
     private URI uri;
     private List<String> command;
-    private DataExchanger exchanger;
-    public GetFoodCommand(DataExchanger exchanger, List<String> commandInput) {
-        this.exchanger = exchanger;
+    public GetFoodCommand(List<String> commandInput) {
+
         this.command = commandInput;
     }
 

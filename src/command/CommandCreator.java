@@ -66,7 +66,7 @@ public class CommandCreator {
         List<String> args = getCommandArguments(clientInput);
         CommandType type = getType(args.get(COMMAND_TYPE_INDEX));
         return switch (type) {
-            case GET_FOOD -> new GetFoodCommand(dataExchanger, args);
+            case GET_FOOD -> new GetFoodCommand(args);
             default -> new GetFoodReportCommand(dataExchanger, args);
         };
     }

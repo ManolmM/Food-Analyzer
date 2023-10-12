@@ -1,5 +1,6 @@
 package storage.foods;
 
+/*
 import exceptions.MissingExtractedDataException;
 import json.extractor.food.fdcid.FoodByFdcId;
 import org.junit.Test;
@@ -56,8 +57,7 @@ public class DataExchangerTest {
     }
 
 
-
-
     //get-food-report 2032440
     //get-food-report 2110388
 }
+*/

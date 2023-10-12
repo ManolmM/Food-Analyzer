@@ -12,5 +12,6 @@ public class FoodAnalyzer {
         CommandExecutor executor = CommandExecutor.newInstance();
         Server server = Server.of(path, Properties.SERVER_PORT, executor);
         server.start();
+
     }
 }

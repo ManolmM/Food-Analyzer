@@ -164,7 +164,7 @@ public class GetFoodReportCommand implements Command {
         if (temp == null) {
             result.append("Ingredients - No information\n");
         } else {
-            result.append(temp).append("\n");
+            result.append("Ingredients - ").append(temp).append("\n");
         }
 
 

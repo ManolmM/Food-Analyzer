@@ -1,5 +1,6 @@
 package command;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class CommandExecutor {
      **/
     public void takeCommand(Command c) {
         if (c == null) {
-            return;
+            throw new IllegalArgumentException("Command should be non-nullable");
         }
 
         commands.add(c);
@@ -42,14 +43,20 @@ public class CommandExecutor {
 
         try {
             int latestCommandIndex = commands.size() - 1;
+            int commandToBeRemovedIndex = latestCommandIndex - 1;  // Previous command's index to be removed.
             if (latestCommandIndex > 0) {
-                commands.remove(latestCommandIndex - 1);
+                commands.remove(commandToBeRemovedIndex);
+                latestCommandIndex -= 1;   // Commands are shifted, so we have to decrement the index with one.
             }
+
             return commands.get(latestCommandIndex).executeRequest();
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            throw new IllegalStateException("Unable to execute latest command");
         }
-        throw new IllegalStateException("Unable to execute latest command");
+    }
+
+    public List<Command> getCommands() {
+        return Collections.unmodifiableList(commands);
     }
 
 }

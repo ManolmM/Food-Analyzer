@@ -63,7 +63,7 @@ public class Server {
             DataExchanger dataExchanger = DataExchanger.of(fileFoodHandler);
             while (isServerWorking) {
                 try {
-                    int readyChannels = selector.select();
+                    int readyChannels = selector.select();//
                     if (readyChannels == 0) {
                         continue;
                     }

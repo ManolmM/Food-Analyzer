@@ -1,4 +1,4 @@
-package storage.foods.nutrients;
+package storage.food.nutrients;
 
 public class NutrientCollection {
     public final static String ENERGY = "Energy";

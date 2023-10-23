@@ -3,16 +3,19 @@ package network.tcp;
 import command.Command;
 import command.CommandCreator;
 import command.CommandExecutor;
+import command.queries.InsertQuery;
+import exceptions.MissingExtractedDataException;
 import exceptions.NoCommandProvidedException;
 import exceptions.MissingCommandArgumentsException;
 import exceptions.UnknownCommandException;
 import network.https.properties.Properties;
-import storage.foods.DataExchanger;
-import storage.foods.FileFoodHandler;
+import storage.databases.ibm_db2.DataExchanger;
+
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.InetSocketAddress;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -20,15 +23,17 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.sql.SQLException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server {
     private static final int BUFFER_SIZE = 32768;
     private final CommandExecutor commandExecutor;
-
-    private Path filePath;
+    private DataExchanger dataExchanger;
+    private InsertQuery insertQuery;
     private final int port;
     private boolean isServerWorking;
 
@@ -36,14 +41,14 @@ public class Server {
     private Selector selector;
     private ExecutorService executorService = Executors.newCachedThreadPool();
 
-    private Server(Path filePath, int port, CommandExecutor commandExecutor) {
-        this.filePath = filePath;
+    private Server(int port, CommandExecutor commandExecutor) throws SQLException, IOException {
         this.port = port;
         this.commandExecutor = commandExecutor;
+        dataExchanger = DataExchanger.of(new InsertQuery());
     }
 
-    public static Server of(Path filePath, int port, CommandExecutor commandExecutor) {
-        return new Server(filePath, port, commandExecutor);
+    public static Server of(int port, CommandExecutor commandExecutor) throws SQLException, IOException {
+        return new Server(port, commandExecutor);
     }
 
     /**
@@ -59,11 +64,10 @@ public class Server {
             this.buffer = ByteBuffer.allocate(BUFFER_SIZE);
             isServerWorking = true;
 
-            FileFoodHandler fileFoodHandler = FileFoodHandler.newInstance(filePath);
-            DataExchanger dataExchanger = DataExchanger.of(fileFoodHandler);
+
             while (isServerWorking) {
                 try {
-                    int readyChannels = selector.select();//
+                    int readyChannels = selector.select();
                     if (readyChannels == 0) {
                         continue;
                     }
@@ -81,14 +85,10 @@ public class Server {
                                 System.out.println("Client request: " + clientInput);
                                 Command inputCommand = CommandCreator.newCommand(dataExchanger, clientInput);
                                 commandExecutor.takeCommand(inputCommand);
-                                String output = commandExecutor.placeCommand();
-                                executorService.submit(() -> {
-                                    try {
-                                        writeClientOutput(clientChannel, output);
-                                    } catch (IOException e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                });
+                                List<String> output = commandExecutor.placeCommand();
+
+                                writeClientOutput(clientChannel, output.get(0));
+
 
                             } catch (NoCommandProvidedException e) {
                                 clientErrorMessage = "No command is provided.";
@@ -105,6 +105,12 @@ public class Server {
                                 writeClientOutput(clientChannel, clientErrorMessage);
                                 keyIterator.remove();
                                 break;
+                            } catch (MissingExtractedDataException e) {
+                                throw new RuntimeException(e);
+                            } catch (URISyntaxException e) {
+                                throw new RuntimeException(e);
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
                             }
                         } else if (key.isAcceptable()) {
                             accept(selector, key);

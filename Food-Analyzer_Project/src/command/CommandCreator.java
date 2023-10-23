@@ -1,17 +1,22 @@
 package command;
 
+import command.rest.get.GetFoodCommand;
+import command.rest.get.GetFoodReportCommand;
 import command.type.CommandType;
 import exceptions.NoCommandProvidedException;
 import exceptions.MissingCommandArgumentsException;
 import exceptions.UnknownCommandException;
-import storage.foods.DataExchanger;
+import storage.databases.ibm_db2.DataExchanger;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class CommandCreator {
 
+    private static ExecutorService executorService = Executors.newCachedThreadPool();
     private final static int COMMAND_TYPE_INDEX = 0;
 
     /**
@@ -66,7 +71,7 @@ public class CommandCreator {
         List<String> args = getCommandArguments(clientInput);
         CommandType type = getType(args.get(COMMAND_TYPE_INDEX));
         return switch (type) {
-            case GET_FOOD -> new GetFoodCommand(args);
+            case GET_FOOD -> new GetFoodCommand(args, executorService);
             default -> new GetFoodReportCommand(dataExchanger, args);
         };
     }

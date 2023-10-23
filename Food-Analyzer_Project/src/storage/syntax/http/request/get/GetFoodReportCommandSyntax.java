@@ -1,6 +1,6 @@
 package storage.syntax.http.request.get;
 
-import storage.foods.nutrients.NutrientCollection;
+import storage.food.nutrients.NutrientCollection;
 
 import java.util.List;
 

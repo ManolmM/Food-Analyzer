@@ -1,14 +1,15 @@
 package command;
 
+import command.rest.get.GetFoodCommand;
+import command.rest.get.GetFoodReportCommand;
 import exceptions.MissingCommandArgumentsException;
 import exceptions.NoCommandProvidedException;
 import exceptions.UnknownCommandException;
 import org.junit.Test;
-import storage.foods.DataExchanger;
+import storage.databases.ibm_db2.DataExchanger;
 
 import java.io.IOException;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 

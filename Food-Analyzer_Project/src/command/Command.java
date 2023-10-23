@@ -4,11 +4,12 @@ import exceptions.MissingExtractedDataException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 
 public interface Command {
 
     /**
      * Executes a request to a RESTful API
      */
-    public String executeRequest() throws IOException, InterruptedException, URISyntaxException, MissingExtractedDataException;
+     List<String> execute() throws IOException, InterruptedException, URISyntaxException, MissingExtractedDataException;
 }

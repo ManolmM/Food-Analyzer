@@ -22,12 +22,12 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
 
 public class Server {
     private static final int BUFFER_SIZE = 32768;
@@ -88,8 +88,6 @@ public class Server {
                                 List<String> output = commandExecutor.placeCommand();
 
                                 writeClientOutput(clientChannel, output.get(0));
-
-
                             } catch (NoCommandProvidedException e) {
                                 clientErrorMessage = "No command is provided.";
                                 writeClientOutput(clientChannel, clientErrorMessage);
@@ -106,11 +104,21 @@ public class Server {
                                 keyIterator.remove();
                                 break;
                             } catch (MissingExtractedDataException e) {
-                                throw new RuntimeException(e);
+                                if (e.getMessage().equals("No such item in the REST API server")) {
+                                    writeClientOutput(clientChannel, "Unable to find food. Try again with another key");
+                                } else {
+                                    writeClientOutput(clientChannel, e.getMessage());
+                                }
+                                keyIterator.remove();
+                                break;
                             } catch (URISyntaxException e) {
-                                throw new RuntimeException(e);
+                                writeClientOutput(clientChannel, "Unexpected error occurred. Unable to provide food");
+                                keyIterator.remove();
+                                break;
                             } catch (InterruptedException e) {
-                                throw new RuntimeException(e);
+                                writeClientOutput(clientChannel, "Unexpected error occurred. Unable to provide food");
+                                keyIterator.remove();
+                                break;
                             }
                         } else if (key.isAcceptable()) {
                             accept(selector, key);
@@ -165,7 +173,7 @@ public class Server {
     /**
      * Writes the output in the buffer.
      */
-    private void writeClientOutput(SocketChannel clientChannel, String output) throws IOException {
+    private synchronized void writeClientOutput(SocketChannel clientChannel, String output) throws IOException {
         buffer.clear();
         buffer.put(output.getBytes());
         buffer.flip();

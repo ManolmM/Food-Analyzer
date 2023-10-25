@@ -67,8 +67,6 @@ public class GetFoodReportCommand implements Command {
             FoodByFdcId foodInOrderNutrients = getNewFoodByFdcId(extractedFood);
             exchanger.storeData(foodInOrderNutrients);
             return clientOutput(foodInOrderNutrients);
-        } catch (MissingExtractedDataException e) {
-            throw e;
         } catch (IOException e) {
             throw e;
         } catch (SQLException e) {

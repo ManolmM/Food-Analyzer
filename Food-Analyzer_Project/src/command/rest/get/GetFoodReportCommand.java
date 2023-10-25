@@ -9,6 +9,7 @@ import json.extractor.food.nutrient.Nutrient;
 import network.https.properties.Properties;
 import storage.databases.ibm_db2.DataExchanger;
 import storage.food.nutrients.NutrientCollection;
+import storage.syntax.http.request.get.GetFoodCommandSyntax;
 import storage.syntax.http.request.get.GetFoodReportCommandSyntax;
 
 import java.io.IOException;
@@ -54,12 +55,12 @@ public class GetFoodReportCommand implements Command {
         Gson gson = new Gson();
         uri = configureUri();
         request = configureRequest(uri);
-
         try {
             String jsonResponse = client.send(request, HttpResponse.BodyHandlers.ofString()).body();
             if (jsonResponse.equals("")) {
                 throw new MissingExtractedDataException("No such item in the REST API server");
             }
+            jsonResponse.replaceAll("'", "");
             FoodByFdcId extractedFood = gson.fromJson(jsonResponse, FoodByFdcId.class);
             FoodByFdcId foodInOrderNutrients = getNewFoodByFdcId(extractedFood);
             exchanger.storeData(foodInOrderNutrients);

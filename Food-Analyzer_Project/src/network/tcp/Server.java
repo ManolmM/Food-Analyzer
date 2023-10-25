@@ -3,32 +3,37 @@ package network.tcp;
 import command.Command;
 import command.CommandCreator;
 import command.CommandExecutor;
+import command.queries.InsertQuery;
+import exceptions.MissingExtractedDataException;
 import exceptions.NoCommandProvidedException;
 import exceptions.MissingCommandArgumentsException;
 import exceptions.UnknownCommandException;
 import network.https.properties.Properties;
-import storage.foods.DataExchanger;
-import storage.foods.FileFoodHandler;
+import storage.databases.ibm_db2.DataExchanger;
+
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.InetSocketAddress;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
+import java.sql.SQLException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
 
 public class Server {
     private static final int BUFFER_SIZE = 32768;
     private final CommandExecutor commandExecutor;
-
-    private Path filePath;
+    private DataExchanger dataExchanger;
+    private InsertQuery insertQuery;
     private final int port;
     private boolean isServerWorking;
 
@@ -36,14 +41,14 @@ public class Server {
     private Selector selector;
     private ExecutorService executorService = Executors.newCachedThreadPool();
 
-    private Server(Path filePath, int port, CommandExecutor commandExecutor) {
-        this.filePath = filePath;
+    private Server(int port, CommandExecutor commandExecutor) throws SQLException, IOException {
         this.port = port;
         this.commandExecutor = commandExecutor;
+        dataExchanger = DataExchanger.of(new InsertQuery());
     }
 
-    public static Server of(Path filePath, int port, CommandExecutor commandExecutor) {
-        return new Server(filePath, port, commandExecutor);
+    public static Server of(int port, CommandExecutor commandExecutor) throws SQLException, IOException {
+        return new Server(port, commandExecutor);
     }
 
     /**
@@ -59,8 +64,7 @@ public class Server {
             this.buffer = ByteBuffer.allocate(BUFFER_SIZE);
             isServerWorking = true;
 
-            FileFoodHandler fileFoodHandler = FileFoodHandler.newInstance(filePath);
-            DataExchanger dataExchanger = DataExchanger.of(fileFoodHandler);
+
             while (isServerWorking) {
                 try {
                     int readyChannels = selector.select();
@@ -81,15 +85,9 @@ public class Server {
                                 System.out.println("Client request: " + clientInput);
                                 Command inputCommand = CommandCreator.newCommand(dataExchanger, clientInput);
                                 commandExecutor.takeCommand(inputCommand);
-                                String output = commandExecutor.placeCommand();
-                                executorService.submit(() -> {
-                                    try {
-                                        writeClientOutput(clientChannel, output);
-                                    } catch (IOException e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                });
+                                List<String> output = commandExecutor.placeCommand();
 
+                                writeClientOutput(clientChannel, output.get(0));
                             } catch (NoCommandProvidedException e) {
                                 clientErrorMessage = "No command is provided.";
                                 writeClientOutput(clientChannel, clientErrorMessage);
@@ -103,6 +101,22 @@ public class Server {
                             } catch (MissingCommandArgumentsException e) {
                                 clientErrorMessage = "Command not completed. Missing arguments.";
                                 writeClientOutput(clientChannel, clientErrorMessage);
+                                keyIterator.remove();
+                                break;
+                            } catch (MissingExtractedDataException e) {
+                                if (e.getMessage().equals("No such item in the REST API server")) {
+                                    writeClientOutput(clientChannel, "Unable to find food. Try again with another key");
+                                } else {
+                                    writeClientOutput(clientChannel, e.getMessage());
+                                }
+                                keyIterator.remove();
+                                break;
+                            } catch (URISyntaxException e) {
+                                writeClientOutput(clientChannel, "Unexpected error occurred. Unable to provide food");
+                                keyIterator.remove();
+                                break;
+                            } catch (InterruptedException e) {
+                                writeClientOutput(clientChannel, "Unexpected error occurred. Unable to provide food");
                                 keyIterator.remove();
                                 break;
                             }
@@ -159,7 +173,7 @@ public class Server {
     /**
      * Writes the output in the buffer.
      */
-    private void writeClientOutput(SocketChannel clientChannel, String output) throws IOException {
+    private synchronized void writeClientOutput(SocketChannel clientChannel, String output) throws IOException {
         buffer.clear();
         buffer.put(output.getBytes());
         buffer.flip();

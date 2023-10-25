@@ -1,13 +1,14 @@
-package command;
+package command.rest.get;
 
 import com.google.gson.Gson;
+import command.Command;
 import exceptions.MissingExtractedDataException;
 import json.extractor.food.fdcid.FoodByFdcId;
 import json.extractor.food.nutrient.FoodNutrients;
 import json.extractor.food.nutrient.Nutrient;
 import network.https.properties.Properties;
-import storage.foods.DataExchanger;
-import storage.foods.nutrients.NutrientCollection;
+import storage.databases.ibm_db2.DataExchanger;
+import storage.food.nutrients.NutrientCollection;
 import storage.syntax.http.request.get.GetFoodReportCommandSyntax;
 
 import java.io.IOException;
@@ -39,10 +40,9 @@ public class GetFoodReportCommand implements Command {
     /**
      * Executes the HTTP GET request to the REST API.
      * Returns human-readable representation about food.
-     * @return String
      */
     @Override
-    public String executeRequest() throws URISyntaxException, IOException, InterruptedException, MissingExtractedDataException {
+    public List<String> execute() throws URISyntaxException, IOException, InterruptedException, MissingExtractedDataException {
 
         FoodByFdcId extractedFoodFromStorage = exchanger.retrieveData(Integer.parseInt(command.get(fdcIdIndex)));
         if (extractedFoodFromStorage != null) {
@@ -55,10 +55,13 @@ public class GetFoodReportCommand implements Command {
         uri = configureUri();
         request = configureRequest(uri);
 
-        String jsonResponse = client.send(request, HttpResponse.BodyHandlers.ofString()).body();
-        FoodByFdcId extractedFood = gson.fromJson(jsonResponse, FoodByFdcId.class);
-        FoodByFdcId foodInOrderNutrients = getNewFoodByFdcId(extractedFood);
         try {
+            String jsonResponse = client.send(request, HttpResponse.BodyHandlers.ofString()).body();
+            if (jsonResponse.equals("")) {
+                throw new MissingExtractedDataException("No such item in the REST API server");
+            }
+            FoodByFdcId extractedFood = gson.fromJson(jsonResponse, FoodByFdcId.class);
+            FoodByFdcId foodInOrderNutrients = getNewFoodByFdcId(extractedFood);
             exchanger.storeData(foodInOrderNutrients);
             return clientOutput(foodInOrderNutrients);
         } catch (MissingExtractedDataException e) {
@@ -87,7 +90,6 @@ public class GetFoodReportCommand implements Command {
 
     /**
      * Returns a query of type: query= + client's input arguments + pageNumber= + queryPage.
-     * @return String
      */
     private String configureQuery() {
         StringBuilder query = new StringBuilder();
@@ -114,10 +116,12 @@ public class GetFoodReportCommand implements Command {
 
     /**
      * Transforms the order of the nutrients in the given food.
-     * @return FoodByFdcId
      */
-    private FoodByFdcId getNewFoodByFdcId(FoodByFdcId food) {
+    private FoodByFdcId getNewFoodByFdcId(FoodByFdcId food) throws MissingExtractedDataException {
 
+        if (food == null) {
+            throw new MissingExtractedDataException("FoodByFdcId should not be null");
+        }
         // The desired order of the nutrients.
         List<String> nutrients = List.of(NutrientCollection.ENERGY,
                 NutrientCollection.PROTEIN,
@@ -144,14 +148,16 @@ public class GetFoodReportCommand implements Command {
                 food.ingredients(), food.gtinUpc(), newFoodNutrients);
 
         return newFoodByFdcId;
+
+
+
     }
 
 
     /**
      * Returns a human-readable information about the food.
-     * @return String
      */
-    private String clientOutput(FoodByFdcId extractedFood) {
+    private List<String> clientOutput(FoodByFdcId extractedFood) {
         StringBuilder result = new StringBuilder();
         String temp = extractedFood.description();
         if (temp == null) {
@@ -205,6 +211,6 @@ public class GetFoodReportCommand implements Command {
             result.append("Fiber - ").append(extractedFood.foodNutrients().get(4).amount()).append("\n");
         }
 
-        return result.toString();
+        return List.of(result.toString());
     }
 }

@@ -1,9 +1,9 @@
-package storage.foods;
+package storage.files;
 
 import json.extractor.food.fdcid.FoodByFdcId;
 import json.extractor.food.nutrient.FoodNutrients;
 import json.extractor.food.nutrient.Nutrient;
-import storage.foods.nutrients.NutrientCollection;
+import storage.food.nutrients.NutrientCollection;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -87,7 +87,7 @@ public class FileFoodHandler {
 
 
     /**
-     * Extract all record of food from the file.
+     * Extracts each record of food from the file.
      * @return List of FoodByFdcId items
      * @throws IOException
      * @throws FileNotFoundException if the file cannot be found.
@@ -116,7 +116,7 @@ public class FileFoodHandler {
                         final int offset = 4;
                         for (int i = 0; i < nutrientListSize; i++) {
                             String nutrientName = nutrientList.get(i);
-                            double amount = Double.parseDouble(fields[offset + i]);
+                            float amount = Float.parseFloat(fields[offset + i]);
                             Nutrient newNutrient = new Nutrient(nutrientName);
                             foodNutrients.add(new FoodNutrients(newNutrient, amount));
                         }

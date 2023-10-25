@@ -1,5 +1,9 @@
 package command;
 
+import exceptions.MissingExtractedDataException;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,28 +35,24 @@ public class CommandExecutor {
 
 
     /**
-     * Executes the latest command added.
+     * Executes the latest added command.
      *
      * @return modified response information from the REST API
      * @throws
      **/
-    public String placeCommand() {
+    public List<String> placeCommand() throws IOException, URISyntaxException, InterruptedException, MissingExtractedDataException {
         if (commands.isEmpty()) {
             throw new IllegalStateException("Trying to execute empty list of commands");
         }
 
-        try {
-            int latestCommandIndex = commands.size() - 1;
-            int commandToBeRemovedIndex = latestCommandIndex - 1;  // Previous command's index to be removed.
-            if (latestCommandIndex > 0) {
-                commands.remove(commandToBeRemovedIndex);
-                latestCommandIndex -= 1;   // Commands are shifted, so we have to decrement the index with one.
-            }
+         int latestCommandIndex = commands.size() - 1;
+         int commandToBeRemovedIndex = latestCommandIndex - 1;  // Previous command's index to be removed.
+         if (latestCommandIndex > 0) {
+             commands.remove(commandToBeRemovedIndex);
+             latestCommandIndex -= 1;   // Commands are shifted, so we have to decrement the index with one.
+         }
 
-            return commands.get(latestCommandIndex).executeRequest();
-        } catch (Exception e) {
-            throw new IllegalStateException("Unable to execute latest command");
-        }
+         return commands.get(latestCommandIndex).execute();
     }
 
     public List<Command> getCommands() {

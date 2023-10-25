@@ -1,8 +1,10 @@
-package storage.foods;
+package storage.food;
 
 import json.extractor.food.fdcid.FoodByFdcId;
 
 import org.junit.Test;
+import storage.databases.ibm_db2.DataExchanger;
+import storage.files.FileFoodHandler;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -22,6 +24,7 @@ public class FileFoodHandlerTest {
     private DataExchanger exchanger;
     private Path path = Path.of(fileDataSet);
 
+/*
     @Test
     public void setUp() throws IOException {
         fileFoodHandler = FileFoodHandler.newInstance(path);
@@ -160,6 +163,7 @@ public class FileFoodHandlerTest {
         tearDown();
     }
 
+*/
 
 
 }

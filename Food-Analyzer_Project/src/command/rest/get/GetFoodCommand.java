@@ -19,9 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
+
 
 public class GetFoodCommand implements Command {
     private HttpRequest request;
@@ -91,7 +89,7 @@ public class GetFoodCommand implements Command {
     private synchronized String configureQuery(String queryPage) {
         return GetFoodCommandSyntax.REQUIRED_API_PARAMETER_QUERY +
                 mergeCommandArguments() +
-                //queryPage +
+                queryPage +
                 GetFoodCommandSyntax.REQUIRED_ALL_WORDS_PARAMETER;
     }
 
@@ -153,16 +151,17 @@ public class GetFoodCommand implements Command {
     }
 
     private List<String> resultPages(int totalPages) throws InterruptedException {
-        AtomicInteger currentPage = new AtomicInteger(1);
+        //AtomicInteger currentPage = new AtomicInteger(1);
         List<String> pageList = Collections.synchronizedList(new ArrayList<>());
 
         List<Callable<String>> tasks = new ArrayList<>();
 
         for (int i = 1; i <= totalPages; i++) {
-
+            final int currentPage = i;
             Callable<String> task = () -> {
+
                 Page page;
-                String newPage = modifyUriQueryPageNumber(currentPage.get());
+                String newPage = modifyUriQueryPageNumber(currentPage);
                 try {
                     uri = configureUri(configureQuery(newPage));
                 } catch (URISyntaxException e) {
@@ -179,7 +178,7 @@ public class GetFoodCommand implements Command {
                 return null;
             };
             tasks.add(task);
-            currentPage.incrementAndGet();
+            //currentPage.incrementAndGet();
         }
         requestExecutor.invokeAll(tasks);
         return Collections.unmodifiableList(pageList);

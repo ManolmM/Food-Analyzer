@@ -14,6 +14,7 @@ import storage.databases.ibm_db2.DB2Connection;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLSyntaxErrorException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -157,9 +158,29 @@ public class InsertQueryTest {
         float actualFiberAmount = Float.parseFloat(resultSet.getString(fiberIndex)); // Gets the value of the only row and column = 6.
         assertEquals(expectedFiberAmount, actualFiberAmount);
 
-        DB2Connection.statement.execute("DELETE FROM FN45798.VIEW_FOOD_ALONG_WITH_NUTRIENTS " +
-                "WHERE BRANDED_FOOD_FDCID = 1000");
+        assertDoesNotThrow(() -> DB2Connection.statement.execute("DELETE FROM FN45798.VIEW_FOOD_ALONG_WITH_NUTRIENTS " +
+                "WHERE BRANDED_FOOD_FDCID = 1000"));
     }
 
+
+
+    @Test
+    public void testInsertIntoVIEW_FOOD_ALONG_WITH_NUTRIENTSAlreadyExisted() throws SQLException {
+        setUpConnection();
+
+        foodNutrients = new FoodNutrients(nutrientMock, 10F);
+        List<FoodNutrients> foodNutrientsList = List.of(foodNutrients, foodNutrients, foodNutrients, foodNutrients, foodNutrients);
+        foodByFdcId = new FoodByFdcId(1000,"description",
+                "Ingredients", "00000000", foodNutrientsList);
+
+        insertQuery.insertIntoVIEW_FOOD_ALONG_WITH_NUTRIENTS(foodByFdcId);      // Inserts a new record in the view.
+        assertThrows(SQLException.class, () -> insertQuery.insertIntoVIEW_FOOD_ALONG_WITH_NUTRIENTS(foodByFdcId)
+                , "Adding row with existing primary key should throw exception");
+
+
+        assertDoesNotThrow(() -> DB2Connection.statement.execute("DELETE FROM FN45798.VIEW_FOOD_ALONG_WITH_NUTRIENTS " +
+                "WHERE BRANDED_FOOD_FDCID = 1000"));
+
+    }
 
 }

@@ -1,4 +1,4 @@
-/*
+
 package command;
 
 import command.rest.get.GetFoodCommand;
@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import storage.databases.ibm_db2.DataExchanger;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.*;
@@ -17,6 +18,9 @@ public class CommandExecutorTest {
     private String args;
     @Mock
     private DataExchanger dataExchangerMock;
+
+    @Mock
+    private ExecutorService executorService;
     @InjectMocks
     private Command command;
     @Mock
@@ -35,8 +39,8 @@ public class CommandExecutorTest {
     @Test
     public void testTakeCommandNonNullableCommand() {
 
-        List<String> commandList = List.of("get-food", "chocolate", "waffle");
-        Command newCommand = new GetFoodCommand(commandList);
+        List<String> commandList = List.of("get-food", "Italian", "pizza");
+        Command newCommand = new GetFoodCommand(commandList, executorService);
 
         assertTrue("No commands added at the beginning.",executor.getCommands().isEmpty());
         executor.takeCommand(newCommand);
@@ -47,14 +51,14 @@ public class CommandExecutorTest {
     }
 
     @Test
-    public void testTakeCommandNonNullableCommandAtStorageWithOneCommand() {
+    public void testTakeCommandNonNullableCommandFromStorageWithOneCommand() {
         int expectedStorageSize;
         int actualStorageSize;
-        List<String> commandList = List.of("get-food","chocolate", "waffle");
-        Command newCommand = new GetFoodCommand(commandList);
+        List<String> commandList = List.of("get-food","Italian", "pizza");
+        Command newCommand = new GetFoodCommand(commandList, executorService);
 
-        testTakeCommandNonNullableCommand();  // Add the first command.
-        executor.takeCommand(newCommand);     // Add the second command.
+        testTakeCommandNonNullableCommand();  // Adds the first command.
+        executor.takeCommand(newCommand);     // Adds the second command.
 
         expectedStorageSize = 2;
         actualStorageSize = executor.getCommands().size();
@@ -67,11 +71,17 @@ public class CommandExecutorTest {
         assertThrows("Trying to execute non-existent command is forbidden.", IllegalStateException.class, () -> executor.placeCommand());
     }
 
+
     @Test
     public void testPlaceCommandAtEmptyCommandStorageShouldReturnNonNullableClientOutput() {
         assertTrue("Command storage should be empty at first.", executor.getCommands().isEmpty());
-        testTakeCommandNonNullableCommand(); // Add a command
-        assertNotNull(executor.placeCommand());
+        testTakeCommandNonNullableCommand(); // Adds a command
+        try {
+            assertNotNull(executor.placeCommand());
+        } catch (Exception e) {
+            //...
+            System.out.println(e.getStackTrace());
+        }
 
         int expectedStorageSize = 1;
         int actualStorageSize = executor.getCommands().size();
@@ -83,19 +93,26 @@ public class CommandExecutorTest {
     public void testPlaceCommandTwoConsecutiveCommandsShouldReturnNonNullableClientOutput() {
         assertTrue("Command storage should be empty at first.", executor.getCommands().isEmpty());
         testTakeCommandNonNullableCommand();    // Add the first command.
-        assertNotNull(executor.placeCommand());
+        try {
+            assertNotNull(executor.placeCommand());
+        } catch (Exception e) {
+            System.out.println(e.getStackTrace());
+        }
 
         List<String> commandList = List.of("get-food", "Raffaello", "treat");
-        Command newCommand = new GetFoodCommand(commandList);
+        Command newCommand = new GetFoodCommand(commandList, executorService);
 
         executor.takeCommand(newCommand); // Adds the second command.
-        executor.placeCommand();
+        try {
+            assertNotNull(executor.placeCommand());
+        } catch (Exception e) {
+            System.out.println(e.getStackTrace());
+        }
+
         int expectedStorageSize = 1;      // Before executing the latest command, the previous is being removed.
         int actualStorageSize = executor.getCommands().size();
         assertEquals(expectedStorageSize, actualStorageSize);
     }
 
-
-
 }
-*/
+

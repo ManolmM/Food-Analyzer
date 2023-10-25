@@ -4,6 +4,7 @@ import exceptions.MissingExtractedDataException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,7 +41,7 @@ public class CommandExecutor {
      * @return modified response information from the REST API
      * @throws
      **/
-    public List<String> placeCommand() throws IOException, URISyntaxException, InterruptedException, MissingExtractedDataException {
+    public List<String> placeCommand() throws IOException, URISyntaxException, InterruptedException, MissingExtractedDataException, SQLException {
         if (commands.isEmpty()) {
             throw new IllegalStateException("Trying to execute empty list of commands");
         }

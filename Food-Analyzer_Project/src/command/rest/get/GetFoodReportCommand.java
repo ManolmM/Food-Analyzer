@@ -18,6 +18,8 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.sql.SQLException;
+import java.sql.SQLSyntaxErrorException;
 import java.util.*;
 
 
@@ -43,7 +45,7 @@ public class GetFoodReportCommand implements Command {
      * Returns human-readable representation about food.
      */
     @Override
-    public List<String> execute() throws URISyntaxException, IOException, InterruptedException, MissingExtractedDataException {
+    public List<String> execute() throws URISyntaxException, IOException, InterruptedException, MissingExtractedDataException, SQLException {
 
         FoodByFdcId extractedFoodFromStorage = exchanger.retrieveData(Integer.parseInt(command.get(fdcIdIndex)));
         if (extractedFoodFromStorage != null) {
@@ -68,6 +70,8 @@ public class GetFoodReportCommand implements Command {
         } catch (MissingExtractedDataException e) {
             throw e;
         } catch (IOException e) {
+            throw e;
+        } catch (SQLException e) {
             throw e;
         }
     }

@@ -12,17 +12,25 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class SelectByFieldTest {
 
-    DB2Connection db2;
+    private final int fdcIdIndex = 1;
+    private final int gtinIndex = 2;
+    private final int descriptionIndex = 3;
+    private final int ingredientIndex = 4;
+    private final int energyIndex = 2;
+    private final int proteinIndex = 3;
+    private final int totalLipidsIndex = 4;
+    private final int carbIndex = 5;
+    private final int fiberIndex = 6;
 
     @Test
     @Before
     public void setUp() {
-        db2 = new DB2Connection();
+        DB2Connection db2 = new DB2Connection();
         db2.openConnection();
     }
 
     @Test
-    public void testSelectFromViewByNonExistingFdcId() throws SQLException {
+    public void testSelectFromTEST_VIEW_FOOD_ALONG_WITH_NUTRIENTSByNonExistingFdcId() throws SQLException {
 
         int fdcId = 0;    // non-existing value;
         String query = "SELECT FROM FN45798.TEST_VIEW_FOOD_ALONG_WITH_NUTRIENTS WHERE branded_food_fdcId = " + fdcId;
@@ -39,25 +47,27 @@ public class SelectByFieldTest {
 
         String selectQuery = "SELECT * FROM FN45798.TEST_VIEW_FOOD_ALONG_WITH_NUTRIENTS WHERE branded_food_fdcId = " + fdcId;
         String insertQuery = "INSERT INTO FN45798.TEST_VIEW_FOOD_ALONG_WITH_NUTRIENTS VALUES(1000, '00000000', null, null, 10.0, 10.0, 10.0, 10.0, 10.0)";
-        assertDoesNotThrow(() -> DB2Connection.statement.executeUpdate(insertQuery));
+        assertDoesNotThrow(() -> DB2Connection.statement.execute(insertQuery));
         ResultSet response = DB2Connection.statement.executeQuery(selectQuery);
 
         response.first();   // Points to the record.
-        assertEquals(fdcId, Integer.parseInt(response.getString(1)));
-        assertEquals(gtin, response.getString(2));
-        assertEquals(null, response.getString(3));
-        assertEquals(null, response.getString(4));
-        assertEquals(10.0, Float.parseFloat(response.getString(5)));
-        assertEquals(10.0, Float.parseFloat(response.getString(6)));
-        assertEquals(10.0, Float.parseFloat(response.getString(7)));
-        assertEquals(10.0, Float.parseFloat(response.getString(8)));
-        assertEquals(10.0, Float.parseFloat(response.getString(9)));
+        assertEquals(fdcId, Integer.parseInt(response.getString(fdcIdIndex)));
+        assertEquals(gtin, response.getString(gtinIndex));
+        assertEquals(null, response.getString(descriptionIndex));
+        assertEquals(null, response.getString(ingredientIndex));
+        assertEquals(10.0, Float.parseFloat(response.getString(energyIndex)));
+        assertEquals(10.0, Float.parseFloat(response.getString(proteinIndex)));
+        assertEquals(10.0, Float.parseFloat(response.getString(totalLipidsIndex)));
+        assertEquals(10.0, Float.parseFloat(response.getString(carbIndex)));
+        assertEquals(10.0, Float.parseFloat(response.getString(fiberIndex)));
 
         String deleteQuery = "DELETE FROM FN45798.TEST_VIEW_FOOD_ALONG_WITH_NUTRIENTS" +
                 " WHERE branded_food_fdcId = " + fdcId;
         assertDoesNotThrow(() -> DB2Connection.statement.execute(deleteQuery));
 
     }
+
+
 
 
 

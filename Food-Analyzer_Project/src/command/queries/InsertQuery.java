@@ -7,6 +7,7 @@ import storage.syntax.database.DatabaseView;
 import storage.syntax.http.request.get.GetFoodReportCommandSyntax;
 
 import java.sql.SQLException;
+import java.sql.SQLSyntaxErrorException;
 import java.util.List;
 
 public class InsertQuery {
@@ -16,15 +17,17 @@ public class InsertQuery {
      * Transforms the record in a suitable form when it is inserted into VIEW_FOOD_ALONG_WITH_NUTRIENTS.
      * @throws IllegalArgumentException if the record is null or if a problem occurs while inserting the record.
      */
-    public void insertIntoVIEW_FOOD_ALONG_WITH_NUTRIENTS(FoodByFdcId record) {
+    public void insertIntoVIEW_FOOD_ALONG_WITH_NUTRIENTS(FoodByFdcId record) throws SQLException {
         if (record == null) {
             throw new IllegalArgumentException("FoodByFdcId should not be null");
         }
         try {
             String viewQuery = fromFoodByFdcIdToQuery(record);
             DB2Connection.statement.execute(viewQuery);
+        } catch (SQLSyntaxErrorException e) {
+            throw new SQLSyntaxErrorException(("Unable to insert data into the database"));
         } catch (SQLException e) {
-            throw new IllegalArgumentException("Unable to insert data into the database");
+            throw e;
         }
     }
 

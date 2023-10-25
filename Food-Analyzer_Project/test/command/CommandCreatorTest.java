@@ -22,7 +22,7 @@ public class CommandCreatorTest {
     public void testNewCommandShouldReturnInstanceOfCommand() throws MissingCommandArgumentsException, UnknownCommandException, IOException, NoCommandProvidedException {
         clientInput = "get-food Raffaello treat";
         Command newCommand = CommandCreator.newCommand(exchanger, clientInput);
-        assertTrue( newCommand instanceof Command);
+        assertTrue(newCommand instanceof Command);
 
     }
 

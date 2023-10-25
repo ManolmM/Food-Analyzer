@@ -1,0 +1,87 @@
+CREATE TABLE BRANDED_FOOD (
+    food_fdcId integer not null,
+    food_gtin varchar(16),
+    food_description varchar(512),
+    food_ingredients varchar(2048),
+    PRIMARY KEY(food_fdcId)
+);
+
+CREATE TABLE NUTRIENTS (
+    food_fdcId integer not null,
+    energy float,
+    protein float,
+    total_lipids float,
+    carbohydrates float,
+    fiber float
+);
+
+CREATE TABLE SHOPPING_LISTS (
+    list_id smallint not null,
+    list_name varchar(32),
+    food_fdcId smallint,
+    PRIMARY KEY (list_id)
+);
+
+CREATE TABLE CUSTOMERS (
+    customer_id smallint not null,
+    first_name varchar(16),
+    second_name varchar(16),
+    customer_shopping_list smallint,
+    PRIMARY KEY (customer_id)
+);
+
+CREATE TABLE EMPLOYEES (
+    employee_id smallint not null,
+    first_name varchar(16),
+    second_name varchar(16),
+    employee_shopping_list smallint,
+    PRIMARY KEY (employee_id)
+);
+
+
+
+ALTER TABLE SHOPPING_LISTS ADD FOREIGN KEY (food_fdcId) REFERENCES BRANDED_FOOD(food_fdcId);
+
+ALTER TABLE NUTRIENTS ADD FOREIGN KEY (food_fdcId) REFERENCES BRANDED_FOOD(food_fdcId) ON DELETE CASCADE ;
+
+ALTER TABLE CUSTOMERS ADD FOREIGN KEY (customer_shopping_list) REFERENCES SHOPPING_LISTS(list_id);
+ALTER TABLE EMPLOYEES ADD FOREIGN KEY (employee_shopping_list) REFERENCES SHOPPING_LISTS(list_id);
+
+
+
+CREATE VIEW VIEW_FOOD_ALONG_WITH_NUTRIENTS AS
+SELECT B.food_fdcId AS branded_food_fdcId, B.food_gtin, B.food_description, B.food_ingredients,
+       N.energy, N.protein, N.total_lipids, N.carbohydrates, N.fiber
+FROM BRANDED_FOOD AS B
+JOIN NUTRIENTS AS N ON B.food_fdcId = N.food_fdcId;
+
+
+
+CREATE TRIGGER trig_v_food_along_with_nutrients
+INSTEAD OF INSERT ON VIEW_FOOD_ALONG_WITH_NUTRIENTS
+REFERENCING NEW AS N
+FOR EACH ROW
+BEGIN
+    -- Insert into BRANDED_FOOD table
+    INSERT INTO BRANDED_FOOD
+    VALUES (N.branded_food_fdcId, N.food_gtin, N.food_description, N.food_ingredients);
+
+    -- Insert into Nutrients table
+    INSERT INTO NUTRIENTS
+    VALUES (N.branded_food_fdcId, N.energy, N.protein, N.total_lipids, N.carbohydrates, N.fiber);
+END;
+
+
+CREATE TRIGGER trig_v_food_along_with_nutrients_on_delete
+INSTEAD OF DELETE ON VIEW_FOOD_ALONG_WITH_NUTRIENTS
+REFERENCING OLD AS O
+FOR EACH ROW
+BEGIN
+    -- Delete from BRANDED_FOOD table
+    DELETE FROM BRANDED_FOOD
+    WHERE branded_food_fdcId = O.branded_food_fdcId;
+
+    -- Delete from Nutrients table
+    DELETE FROM NUTRIENTS
+    WHERE branded_food_fdcId = O.branded_food_fdcId;
+END;

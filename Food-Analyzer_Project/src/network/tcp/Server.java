@@ -111,7 +111,12 @@ public class Server {
                                 }
                                 keyIterator.remove();
                                 break;
-                            } catch (URISyntaxException e) {
+                            } catch (SQLException e) {
+                                clientErrorMessage = "Problem occurred while storing data. Try again, or contact an administrator";
+                                writeClientOutput(clientChannel, clientErrorMessage);
+                                keyIterator.remove();
+                                break;
+                            }catch (URISyntaxException e) {
                                 writeClientOutput(clientChannel, "Unexpected error occurred. Unable to provide food");
                                 keyIterator.remove();
                                 break;

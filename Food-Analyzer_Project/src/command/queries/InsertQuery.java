@@ -22,7 +22,7 @@ public class InsertQuery {
         }
         try {
             String viewQuery = fromFoodByFdcIdToQuery(record);
-            DB2Connection.statement.executeUpdate(viewQuery);
+            DB2Connection.statement.executeQuery(viewQuery);
         } catch (SQLException e) {
             throw new IllegalArgumentException("Unable to insert data into the database");
         }

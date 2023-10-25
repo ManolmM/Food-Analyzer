@@ -54,7 +54,7 @@ public class DataExchanger {
      * Stores a record of food.
      * @throws MissingExtractedDataException if null is passed to be stored.
      */
-    public void storeData(FoodByFdcId record) throws MissingExtractedDataException, IOException {
+    public void storeData(FoodByFdcId record) throws MissingExtractedDataException, IOException, SQLException {
         if (record == null) {
             throw new MissingExtractedDataException("Empty food by fdcId to insert into the database");
         }

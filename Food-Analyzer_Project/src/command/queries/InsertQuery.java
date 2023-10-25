@@ -22,7 +22,7 @@ public class InsertQuery {
         }
         try {
             String viewQuery = fromFoodByFdcIdToQuery(record);
-            DB2Connection.statement.executeQuery(viewQuery);
+            DB2Connection.statement.execute(viewQuery);
         } catch (SQLException e) {
             throw new IllegalArgumentException("Unable to insert data into the database");
         }
@@ -60,18 +60,11 @@ public class InsertQuery {
 
         int nutrientListSize = GetFoodReportCommandSyntax.nutrientsOrderList.size() - 1;
         for (int i = 0; i < nutrientListSize; i++) {
-            if (foodNutrientsList.get(i).amount() == 0.0) {
-                query.append("null").append(", ");
-            } else {
-                query.append(foodNutrientsList.get(i).amount()).append(", ");
-            }
-        }
-        if (foodNutrientsList.get(nutrientListSize - 1).amount() == 0.0) {
-            query.append("null");
-        } else {
-            query.append(foodNutrientsList.get(nutrientListSize - 1).amount());
+
+            query.append(foodNutrientsList.get(i).amount()).append(", ");
         }
 
+        query.append(foodNutrientsList.get(nutrientListSize - 1).amount());
         query.append(')');
         return query.toString();
     }

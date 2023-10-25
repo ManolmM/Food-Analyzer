@@ -89,4 +89,8 @@ public class DataExchanger {
 
         return transformedData.toString();
     }
+
+    public List<FoodByFdcId> getStorage() {
+        return Collections.unmodifiableList(storage);
+    }
 }

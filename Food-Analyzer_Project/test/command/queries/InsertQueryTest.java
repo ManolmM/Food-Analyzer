@@ -12,6 +12,10 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import storage.databases.ibm_db2.DB2Connection;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -34,7 +38,7 @@ public class InsertQueryTest {
         db2 = new DB2Connection();
         db2.openConnection();
     }
-/*
+
     @Test
     public void testExecuteWhenDataBaseIsEmpty() throws SQLException {
         setUp();
@@ -80,10 +84,10 @@ public class InsertQueryTest {
         List<FoodNutrients> foodNutrientsList = List.of(foodNutrients, foodNutrients, foodNutrients, foodNutrients, foodNutrients);
         foodByFdcId = new FoodByFdcId(1000,"description",
                 "Ingredients", "00000000", foodNutrientsList);
-        insertQuery = new InsertQuery(foodByFdcId);
+        insertQuery = new InsertQuery();
 
         ResultSet resultSet = DB2Connection.statement.executeQuery("SELECT * FROM FN45798.BRANDED_FOOD");
-        insertQuery.execute();      // Inserts a new record in the table.
+        insertQuery.insertIntoVIEW_FOOD_ALONG_WITH_NUTRIENTS(foodByFdcId);      // Inserts a new record in the table.
 
 
         resultSet = DB2Connection.statement.executeQuery("SELECT * FROM FN45798.BRANDED_FOOD");
@@ -134,7 +138,7 @@ public class InsertQueryTest {
         assertEquals(expectedFiberAmount, actualFiberAmount);
     }
 
-*/
+
 
 
 }
